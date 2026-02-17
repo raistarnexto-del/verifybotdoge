@@ -1,275 +1,351 @@
 from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
 import json
-import os
 import hashlib
 import secrets
-import time
 import requests
+import asyncio
+import re
+import os
 from datetime import datetime
 from functools import wraps
-
-# Telegram MTProto
-from telethon import TelegramClient
-from telethon.sessions import StringSession
-from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError
-import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 app = Flask(__name__)
+CORS(app)
 
-# Configuration
+# ============== Configuration ==============
 TELEGRAM_API_ID = 27241932
 TELEGRAM_API_HASH = "218edeae0f4cf9053d7dcbf3b1485048"
 WALLET_ADDRESS = "0x8E00A980274Cfb22798290586d97F7D185E3092D"
 BSCSCAN_API_KEY = "8BHURRRGKXD35BPGQZ8E94CVEVAUNMD9UF"
-USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"  # BSC USDT
+USDT_CONTRACT_BSC = "0x55d398326f99059fF775485246999027B3197955"
 MIN_DEPOSIT = 1.5
 MIN_WITHDRAWAL = 2.0
 
-# Firebase configuration
+# Firebase
 FIREBASE_URL = "https://lolaminig-afea4-default-rtdb.firebaseio.com"
-FIREBASE_API_KEY = "AIzaSyDNz-0UL60ZXQdSGte8Tcqz-ciNPYQjLJM"
 
-# Country prices
+# Thread pool for async operations
+executor = ThreadPoolExecutor(max_workers=4)
+
+# Country Prices
 COUNTRY_PRICES = {
-    'US': {'sell': 0.75, 'buy': 0.95},
-    'UK': {'sell': 0.80, 'buy': 1.00},
-    'CA': {'sell': 0.25, 'buy': 0.45},
-    'DE': {'sell': 1.50, 'buy': 1.70},
-    'FR': {'sell': 1.20, 'buy': 1.40},
-    'NL': {'sell': 1.00, 'buy': 1.20},
-    'PL': {'sell': 0.90, 'buy': 1.10},
-    'AU': {'sell': 1.00, 'buy': 1.20}
+    'US': {'sell': 0.75, 'buy': 0.95, 'name': 'الولايات المتحدة', 'flag': 'us', 'code': '+1'},
+    'UK': {'sell': 0.80, 'buy': 1.00, 'name': 'المملكة المتحدة', 'flag': 'gb', 'code': '+44'},
+    'CA': {'sell': 0.25, 'buy': 0.45, 'name': 'كندا', 'flag': 'ca', 'code': '+1'},
+    'DE': {'sell': 1.50, 'buy': 1.70, 'name': 'ألمانيا', 'flag': 'de', 'code': '+49'},
+    'FR': {'sell': 1.20, 'buy': 1.40, 'name': 'فرنسا', 'flag': 'fr', 'code': '+33'},
+    'NL': {'sell': 1.00, 'buy': 1.20, 'name': 'هولندا', 'flag': 'nl', 'code': '+31'},
+    'PL': {'sell': 0.90, 'buy': 1.10, 'name': 'بولندا', 'flag': 'pl', 'code': '+48'},
+    'AU': {'sell': 1.00, 'buy': 1.20, 'name': 'أستراليا', 'flag': 'au', 'code': '+61'}
 }
 
-# In-memory session storage for phone code hash
-phone_code_hashes = {}
-telegram_clients = {}
+# Session storage
+phone_sessions = {}
 
-# Helper functions
-def firebase_get(path):
-    """Get data from Firebase"""
+# ============== Firebase Helpers ==============
+def fb_request(method, path, data=None):
+    url = f"{FIREBASE_URL}/{path}.json"
     try:
-        response = requests.get(f"{FIREBASE_URL}/{path}.json")
-        return response.json() if response.status_code == 200 else None
+        if method == 'GET':
+            r = requests.get(url, timeout=10)
+        elif method == 'POST':
+            r = requests.post(url, json=data, timeout=10)
+        elif method == 'PUT':
+            r = requests.put(url, json=data, timeout=10)
+        elif method == 'PATCH':
+            r = requests.patch(url, json=data, timeout=10)
+        elif method == 'DELETE':
+            r = requests.delete(url, timeout=10)
+        else:
+            return None
+        return r.json() if r.status_code == 200 else None
     except:
         return None
 
-def firebase_set(path, data):
-    """Set data in Firebase"""
-    try:
-        response = requests.put(f"{FIREBASE_URL}/{path}.json", json=data)
-        return response.status_code == 200
-    except:
-        return False
+def fb_get(path): return fb_request('GET', path)
+def fb_push(path, data): 
+    r = fb_request('POST', path, data)
+    return r.get('name') if r else None
+def fb_update(path, data): return fb_request('PATCH', path, data)
+def fb_delete(path): return fb_request('DELETE', path)
 
-def firebase_push(path, data):
-    """Push data to Firebase"""
-    try:
-        response = requests.post(f"{FIREBASE_URL}/{path}.json", json=data)
-        if response.status_code == 200:
-            return response.json().get('name')
-        return None
-    except:
-        return None
-
-def firebase_update(path, data):
-    """Update data in Firebase"""
-    try:
-        response = requests.patch(f"{FIREBASE_URL}/{path}.json", json=data)
-        return response.status_code == 200
-    except:
-        return False
-
-def firebase_delete(path):
-    """Delete data from Firebase"""
-    try:
-        response = requests.delete(f"{FIREBASE_URL}/{path}.json")
-        return response.status_code == 200
-    except:
-        return False
-
+# ============== Helpers ==============
 def generate_token():
-    """Generate auth token"""
     return secrets.token_hex(32)
 
-def hash_password(password):
-    """Hash password"""
-    return hashlib.sha256(password.encode()).hexdigest()
+def hash_password(pwd):
+    return hashlib.sha256(pwd.encode()).hexdigest()
 
 def detect_country(phone):
-    """Detect country from phone number"""
-    if phone.startswith('+49'):
-        return 'DE'
-    elif phone.startswith('+44'):
-        return 'UK'
-    elif phone.startswith('+33'):
-        return 'FR'
-    elif phone.startswith('+31'):
-        return 'NL'
-    elif phone.startswith('+48'):
-        return 'PL'
-    elif phone.startswith('+61'):
-        return 'AU'
+    phone = phone.replace(' ', '').replace('-', '')
+    if phone.startswith('+49'): return 'DE'
+    elif phone.startswith('+44'): return 'UK'
+    elif phone.startswith('+33'): return 'FR'
+    elif phone.startswith('+31'): return 'NL'
+    elif phone.startswith('+48'): return 'PL'
+    elif phone.startswith('+61'): return 'AU'
     elif phone.startswith('+1'):
-        area_code = phone[2:5] if len(phone) > 4 else ''
-        canada_codes = ['204', '226', '236', '249', '250', '289', '306', '343', '365', '387', 
-                       '403', '416', '418', '431', '437', '438', '450', '506', '514', '519',
-                       '548', '579', '581', '587', '604', '613', '639', '647', '672', '705',
-                       '709', '778', '780', '782', '807', '819', '825', '867', '873', '902', '905']
-        return 'CA' if area_code in canada_codes else 'US'
+        if len(phone) >= 5:
+            area = phone[2:5]
+            ca_codes = ['204','226','236','249','250','289','306','343','365','387',
+                       '403','416','418','431','437','438','450','506','514','519',
+                       '548','579','581','587','604','613','639','647','672','705',
+                       '709','778','780','782','807','819','825','867','873','902','905']
+            return 'CA' if area in ca_codes else 'US'
+        return 'US'
     return None
 
-def verify_token(f):
-    """Token verification decorator"""
+def verify_token_decorator(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization', '').replace('Bearer ', '')
+        auth = request.headers.get('Authorization', '')
+        token = auth.replace('Bearer ', '') if auth.startswith('Bearer ') else ''
         if not token:
-            return jsonify({'success': False, 'error': 'No token provided'}), 401
-        
-        users = firebase_get('users') or {}
-        for user_id, user_data in users.items():
-            if user_data.get('token') == token:
-                request.user_id = user_id
-                request.user = user_data
+            return jsonify({'success': False, 'error': 'يرجى تسجيل الدخول'}), 401
+        users = fb_get('users') or {}
+        for uid, udata in users.items():
+            if udata and udata.get('token') == token:
+                request.user_id = uid
+                request.user = udata
                 return f(*args, **kwargs)
-        
-        return jsonify({'success': False, 'error': 'Invalid token'}), 401
+        return jsonify({'success': False, 'error': 'جلسة غير صالحة'}), 401
     return decorated
 
-async def get_telegram_client(phone):
-    """Get or create Telegram client"""
-    if phone in telegram_clients:
-        return telegram_clients[phone]
+# ============== Telegram Functions ==============
+def run_telegram_async(coro):
+    """Run async telegram operation in separate thread with new event loop"""
+    def run():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(coro)
+        finally:
+            loop.close()
     
-    client = TelegramClient(StringSession(), TELEGRAM_API_ID, TELEGRAM_API_HASH)
-    await client.connect()
-    telegram_clients[phone] = client
-    return client
+    future = executor.submit(run)
+    return future.result(timeout=60)
 
-async def send_code_request(phone):
-    """Send code request to Telegram"""
-    client = await get_telegram_client(phone)
+async def tg_send_code(phone):
+    from telethon import TelegramClient
+    from telethon.sessions import StringSession
+    from telethon.errors import FloodWaitError
+    
+    client = TelegramClient(
+        StringSession(),
+        TELEGRAM_API_ID,
+        TELEGRAM_API_HASH,
+        device_model="Samsung Galaxy S21",
+        system_version="Android 12",
+        app_version="8.9.0"
+    )
+    
     try:
+        await client.connect()
         result = await client.send_code_request(phone)
-        phone_code_hashes[phone] = result.phone_code_hash
-        return True, result.phone_code_hash
+        session_str = client.session.save()
+        
+        phone_sessions[phone] = {
+            'session': session_str,
+            'phone_code_hash': result.phone_code_hash,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        return True, "تم إرسال الكود"
+    except FloodWaitError as e:
+        return False, f"انتظر {e.seconds} ثانية"
     except Exception as e:
         return False, str(e)
+    finally:
+        if client.is_connected():
+            await client.disconnect()
 
-async def sign_in_with_code(phone, code):
-    """Sign in with code"""
-    client = await get_telegram_client(phone)
+async def tg_verify_code(phone, code):
+    from telethon import TelegramClient
+    from telethon.sessions import StringSession
+    from telethon.errors import PhoneCodeInvalidError, PhoneCodeExpiredError, SessionPasswordNeededError
+    
+    if phone not in phone_sessions:
+        return False, "اطلب كود جديد", None
+    
+    session_data = phone_sessions[phone]
+    
+    client = TelegramClient(
+        StringSession(session_data['session']),
+        TELEGRAM_API_ID,
+        TELEGRAM_API_HASH
+    )
+    
     try:
-        phone_code_hash = phone_code_hashes.get(phone)
-        if not phone_code_hash:
-            return False, "No code request found", None
-        
-        await client.sign_in(phone, code, phone_code_hash=phone_code_hash)
-        session_string = client.session.save()
-        return True, "Success", session_string
+        await client.connect()
+        await client.sign_in(
+            phone=phone,
+            code=code,
+            phone_code_hash=session_data['phone_code_hash']
+        )
+        final_session = client.session.save()
+        del phone_sessions[phone]
+        return True, "تم التحقق", final_session
     except PhoneCodeInvalidError:
-        return False, "Invalid code", None
+        return False, "الكود غير صحيح", None
+    except PhoneCodeExpiredError:
+        if phone in phone_sessions:
+            del phone_sessions[phone]
+        return False, "انتهت صلاحية الكود", None
     except SessionPasswordNeededError:
-        return False, "2FA enabled - not allowed", None
+        return False, "الحساب محمي بـ 2FA", None
     except Exception as e:
         return False, str(e), None
+    finally:
+        if client.is_connected():
+            await client.disconnect()
 
-async def get_telegram_messages(session_string, limit=5):
-    """Get messages from Telegram (verification codes)"""
+async def tg_get_messages(session_string):
+    from telethon import TelegramClient
+    from telethon.sessions import StringSession
+    
+    client = TelegramClient(
+        StringSession(session_string),
+        TELEGRAM_API_ID,
+        TELEGRAM_API_HASH
+    )
+    
+    messages = []
     try:
-        client = TelegramClient(StringSession(session_string), TELEGRAM_API_ID, TELEGRAM_API_HASH)
         await client.connect()
+        if not await client.is_user_authorized():
+            return []
         
-        messages = []
-        async for message in client.iter_messages(777000, limit=limit):  # 777000 is Telegram's ID
-            if message.message:
-                # Extract code from message
-                import re
-                codes = re.findall(r'\b\d{5,6}\b', message.message)
+        async for msg in client.iter_messages(777000, limit=10):
+            if msg.message:
+                codes = re.findall(r'\b\d{5,6}\b', msg.message)
                 if codes:
                     messages.append({
                         'code': codes[0],
-                        'timestamp': message.date.isoformat(),
-                        'text': message.message[:100]
+                        'text': msg.message[:100],
+                        'timestamp': msg.date.isoformat()
                     })
-        
-        await client.disconnect()
         return messages
-    except Exception as e:
-        print(f"Error getting messages: {e}")
+    except:
         return []
+    finally:
+        if client.is_connected():
+            await client.disconnect()
 
-async def terminate_other_sessions(session_string):
-    """Terminate all other sessions"""
+async def tg_logout(session_string):
+    from telethon import TelegramClient
+    from telethon.sessions import StringSession
+    
+    client = TelegramClient(
+        StringSession(session_string),
+        TELEGRAM_API_ID,
+        TELEGRAM_API_HASH
+    )
+    
     try:
-        client = TelegramClient(StringSession(session_string), TELEGRAM_API_ID, TELEGRAM_API_HASH)
         await client.connect()
-        await client.disconnect()
+        await client.log_out()
         return True
     except:
         return False
+    finally:
+        if client.is_connected():
+            await client.disconnect()
 
-def verify_bsc_transaction(txid):
-    """Verify BSC transaction"""
+def verify_bsc_tx(txid):
     try:
-        # Get transaction details
-        url = f"https://api.bscscan.com/api?module=proxy&action=eth_getTransactionByHash&txhash={txid}&apikey={BSCSCAN_API_KEY}"
-        response = requests.get(url)
-        data = response.json()
+        url = "https://api.bscscan.com/api"
+        params = {
+            'module': 'proxy',
+            'action': 'eth_getTransactionByHash',
+            'txhash': txid,
+            'apikey': BSCSCAN_API_KEY
+        }
+        r = requests.get(url, params=params, timeout=15)
+        data = r.json()
         
-        if data.get('result'):
-            tx = data['result']
-            to_address = tx.get('to', '').lower()
-            
-            # Check if it's a token transfer to our wallet
-            if to_address == USDT_CONTRACT.lower():
-                # Decode input data for ERC20 transfer
-                input_data = tx.get('input', '')
-                if input_data.startswith('0xa9059cbb'):  # transfer method
-                    # Extract recipient and amount
-                    recipient = '0x' + input_data[34:74]
+        if not data.get('result'):
+            return False, 0
+        
+        tx = data['result']
+        to_addr = tx.get('to', '').lower()
+        
+        if to_addr == USDT_CONTRACT_BSC.lower():
+            input_data = tx.get('input', '')
+            if input_data.startswith('0xa9059cbb'):
+                recipient = '0x' + input_data[34:74]
+                if recipient.lower() == WALLET_ADDRESS.lower():
                     amount_hex = input_data[74:138]
                     amount = int(amount_hex, 16) / (10 ** 18)
-                    
-                    if recipient.lower() == WALLET_ADDRESS.lower() and amount >= MIN_DEPOSIT:
+                    if amount >= MIN_DEPOSIT:
                         return True, amount
-            
-            # Check direct BNB transfer
-            if to_address == WALLET_ADDRESS.lower():
-                value = int(tx.get('value', '0'), 16) / (10 ** 18)
-                if value >= MIN_DEPOSIT:
-                    return True, value
+        
+        if to_addr == WALLET_ADDRESS.lower():
+            value = int(tx.get('value', '0'), 16) / (10 ** 18)
+            if value >= 0.004:
+                return True, value * 350
         
         return False, 0
-    except Exception as e:
-        print(f"Error verifying transaction: {e}")
+    except:
         return False, 0
 
-# Routes
+# ============== Routes ==============
+
 @app.route('/')
-def index():
+def serve_index():
     return send_file('index.html')
 
+@app.route('/api/stats')
+def get_stats():
+    numbers = fb_get('numbers') or {}
+    users = fb_get('users') or {}
+    available = sum(1 for n in numbers.values() if n and n.get('status') == 'available')
+    sold = sum(1 for n in numbers.values() if n and n.get('status') == 'sold')
+    return jsonify({
+        'availableNumbers': available,
+        'soldNumbers': sold,
+        'totalUsers': len(users)
+    })
+
+@app.route('/api/countries')
+def get_countries():
+    numbers = fb_get('numbers') or {}
+    result = []
+    for code, info in COUNTRY_PRICES.items():
+        count = sum(1 for n in numbers.values() 
+                   if n and n.get('status') == 'available' and n.get('country') == code)
+        result.append({
+            'code': code,
+            'name': info['name'],
+            'flag': info['flag'],
+            'phoneCode': info['code'],
+            'buyPrice': info['buy'],
+            'sellPrice': info['sell'],
+            'stock': count
+        })
+    return jsonify({'countries': result})
+
+# Auth
 @app.route('/api/auth/register', methods=['POST'])
 def register():
-    data = request.json
+    data = request.json or {}
     username = data.get('username', '').strip()
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
     
-    if not username or not email or not password:
+    if not all([username, email, password]):
         return jsonify({'success': False, 'error': 'جميع الحقول مطلوبة'})
+    if len(password) < 6:
+        return jsonify({'success': False, 'error': 'كلمة المرور قصيرة'})
     
-    # Check if email exists
-    users = firebase_get('users') or {}
-    for user_data in users.values():
-        if user_data.get('email') == email:
-            return jsonify({'success': False, 'error': 'البريد الإلكتروني مستخدم بالفعل'})
+    users = fb_get('users') or {}
+    for u in users.values():
+        if u and u.get('email') == email:
+            return jsonify({'success': False, 'error': 'البريد مستخدم'})
     
-    # Create user
     token = generate_token()
-    user_id = firebase_push('users', {
+    uid = fb_push('users', {
         'username': username,
         'email': email,
         'password': hash_password(password),
@@ -278,488 +354,320 @@ def register():
         'createdAt': datetime.now().isoformat()
     })
     
-    if user_id:
+    if uid:
         return jsonify({
             'success': True,
-            'user': {
-                'id': user_id,
-                'username': username,
-                'email': email,
-                'balance': 0.0,
-                'token': token
-            }
+            'user': {'id': uid, 'username': username, 'email': email, 'balance': 0.0, 'token': token}
         })
-    
-    return jsonify({'success': False, 'error': 'حدث خطأ في إنشاء الحساب'})
+    return jsonify({'success': False, 'error': 'حدث خطأ'})
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
-    data = request.json
+    data = request.json or {}
     email = data.get('email', '').strip().lower()
     password = data.get('password', '')
     
-    users = firebase_get('users') or {}
-    for user_id, user_data in users.items():
-        if user_data.get('email') == email and user_data.get('password') == hash_password(password):
-            # Generate new token
+    users = fb_get('users') or {}
+    for uid, u in users.items():
+        if u and u.get('email') == email and u.get('password') == hash_password(password):
             token = generate_token()
-            firebase_update(f'users/{user_id}', {'token': token})
-            
+            fb_update(f'users/{uid}', {'token': token})
             return jsonify({
                 'success': True,
-                'user': {
-                    'id': user_id,
-                    'username': user_data.get('username'),
-                    'email': email,
-                    'balance': user_data.get('balance', 0.0),
-                    'token': token
-                }
+                'user': {'id': uid, 'username': u.get('username'), 'email': email, 
+                        'balance': u.get('balance', 0), 'token': token}
             })
-    
-    return jsonify({'success': False, 'error': 'بيانات الدخول غير صحيحة'})
+    return jsonify({'success': False, 'error': 'بيانات غير صحيحة'})
 
-@app.route('/api/stats')
-def get_stats():
-    numbers = firebase_get('numbers') or {}
-    users = firebase_get('users') or {}
-    
-    available = sum(1 for n in numbers.values() if n.get('status') == 'available')
-    sold = sum(1 for n in numbers.values() if n.get('status') == 'sold')
-    
-    return jsonify({
-        'availableNumbers': available,
-        'soldNumbers': sold,
-        'totalUsers': len(users)
-    })
-
-@app.route('/api/numbers/available')
-def get_available_numbers():
-    numbers = firebase_get('numbers') or {}
-    
-    counts = {}
-    for num in numbers.values():
-        if num.get('status') == 'available':
-            country = num.get('country', 'US')
-            counts[country] = counts.get(country, 0) + 1
-    
-    return jsonify({'counts': counts})
-
-@app.route('/api/numbers/buy', methods=['POST'])
-@verify_token
+# Buy
+@app.route('/api/buy', methods=['POST'])
+@verify_token_decorator
 def buy_number():
-    data = request.json
-    country_code = data.get('countryCode')
+    data = request.json or {}
+    country = data.get('country')
     
-    if country_code not in COUNTRY_PRICES:
-        return jsonify({'success': False, 'error': 'Invalid country'})
+    if country not in COUNTRY_PRICES:
+        return jsonify({'success': False, 'error': 'دولة غير مدعومة'})
     
-    price = COUNTRY_PRICES[country_code]['buy']
-    user = request.user
+    price = COUNTRY_PRICES[country]['buy']
+    balance = request.user.get('balance', 0)
     
-    if user.get('balance', 0) < price:
+    if balance < price:
         return jsonify({'success': False, 'error': 'رصيد غير كافٍ'})
     
-    # Find available number
-    numbers = firebase_get('numbers') or {}
-    available_number = None
-    number_id = None
+    numbers = fb_get('numbers') or {}
+    target = None
+    target_id = None
     
-    for nid, num in numbers.items():
-        if num.get('status') == 'available' and num.get('country') == country_code:
-            available_number = num
-            number_id = nid
+    for nid, n in numbers.items():
+        if n and n.get('status') == 'available' and n.get('country') == country:
+            target = n
+            target_id = nid
             break
     
-    if not available_number:
-        return jsonify({'success': False, 'error': 'لا توجد أرقام متاحة لهذه الدولة'})
+    if not target:
+        return jsonify({'success': False, 'error': 'لا توجد أرقام متاحة'})
     
-    # Deduct balance
-    new_balance = user.get('balance', 0) - price
-    firebase_update(f'users/{request.user_id}', {'balance': new_balance})
+    new_balance = balance - price
+    fb_update(f'users/{request.user_id}', {'balance': new_balance})
     
-    # Create purchase record
-    purchase_id = firebase_push('purchases', {
+    purchase_id = fb_push('purchases', {
         'userId': request.user_id,
-        'numberId': number_id,
-        'phone': available_number.get('phone'),
-        'country': country_code,
+        'numberId': target_id,
+        'phone': target['phone'],
+        'country': country,
         'price': price,
+        'session': target.get('session'),
         'status': 'active',
-        'sessionString': available_number.get('sessionString'),
         'createdAt': datetime.now().isoformat()
     })
     
-    # Update number status
-    firebase_update(f'numbers/{number_id}', {'status': 'sold', 'soldTo': request.user_id})
+    fb_update(f'numbers/{target_id}', {'status': 'sold', 'soldTo': request.user_id})
     
     return jsonify({
         'success': True,
         'purchaseId': purchase_id,
-        'phone': available_number.get('phone')
+        'phone': target['phone'],
+        'newBalance': new_balance
     })
 
 @app.route('/api/messages/<purchase_id>')
-@verify_token
+@verify_token_decorator
 def get_messages(purchase_id):
-    purchase = firebase_get(f'purchases/{purchase_id}')
-    
+    purchase = fb_get(f'purchases/{purchase_id}')
     if not purchase or purchase.get('userId') != request.user_id:
-        return jsonify({'success': False, 'error': 'Not found'})
+        return jsonify({'success': False, 'error': 'غير موجود'})
     
-    session_string = purchase.get('sessionString')
-    if not session_string:
-        return jsonify({'success': False, 'error': 'No session'})
+    session = purchase.get('session')
+    if not session:
+        return jsonify({'success': True, 'messages': []})
     
-    # Get messages asynchronously
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    messages = loop.run_until_complete(get_telegram_messages(session_string))
-    loop.close()
-    
-    return jsonify({'success': True, 'messages': messages})
+    try:
+        messages = run_telegram_async(tg_get_messages(session))
+        return jsonify({'success': True, 'messages': messages})
+    except:
+        return jsonify({'success': True, 'messages': []})
 
-@app.route('/api/numbers/confirm-usage', methods=['POST'])
-@verify_token
-def confirm_usage():
-    data = request.json
+@app.route('/api/complete', methods=['POST'])
+@verify_token_decorator
+def complete_purchase():
+    data = request.json or {}
     purchase_id = data.get('purchaseId')
     
-    purchase = firebase_get(f'purchases/{purchase_id}')
-    
+    purchase = fb_get(f'purchases/{purchase_id}')
     if not purchase or purchase.get('userId') != request.user_id:
-        return jsonify({'success': False, 'error': 'Not found'})
+        return jsonify({'success': False, 'error': 'غير موجود'})
     
-    # Terminate session
-    session_string = purchase.get('sessionString')
-    if session_string:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(terminate_other_sessions(session_string))
-        loop.close()
+    session = purchase.get('session')
+    if session:
+        try:
+            run_telegram_async(tg_logout(session))
+        except:
+            pass
     
-    # Update purchase status
-    firebase_update(f'purchases/{purchase_id}', {
-        'status': 'completed',
-        'completedAt': datetime.now().isoformat()
-    })
-    
+    fb_update(f'purchases/{purchase_id}', {'status': 'completed', 'completedAt': datetime.now().isoformat()})
     return jsonify({'success': True})
 
 @app.route('/api/my-numbers')
-@verify_token
-def get_my_numbers():
-    purchases = firebase_get('purchases') or {}
-    
-    user_numbers = []
-    for pid, purchase in purchases.items():
-        if purchase.get('userId') == request.user_id:
-            user_numbers.append({
-                'id': pid,
-                'phone': purchase.get('phone'),
-                'country': purchase.get('country'),
-                'status': purchase.get('status'),
-                'createdAt': purchase.get('createdAt')
+@verify_token_decorator
+def my_numbers():
+    purchases = fb_get('purchases') or {}
+    result = []
+    for pid, p in purchases.items():
+        if p and p.get('userId') == request.user_id:
+            result.append({
+                'id': pid, 'phone': p.get('phone'), 'country': p.get('country'),
+                'status': p.get('status'), 'createdAt': p.get('createdAt')
             })
-    
-    return jsonify({'numbers': user_numbers})
+    result.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+    return jsonify({'success': True, 'numbers': result})
 
-@app.route('/api/sell/request-code', methods=['POST'])
-@verify_token
-def sell_request_code():
-    data = request.json
+# Sell
+@app.route('/api/sell/send-code', methods=['POST'])
+@verify_token_decorator
+def sell_send_code():
+    data = request.json or {}
     phone = data.get('phone', '').strip()
     
     if not phone.startswith('+'):
-        return jsonify({'success': False, 'error': 'يجب أن يبدأ الرقم بـ +'})
+        return jsonify({'success': False, 'error': 'الرقم يجب أن يبدأ بـ +'})
     
     country = detect_country(phone)
     if not country:
-        return jsonify({'success': False, 'error': 'الدولة غير مدعومة'})
+        return jsonify({'success': False, 'error': 'دولة غير مدعومة'})
     
-    # Send code request
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    success, result = loop.run_until_complete(send_code_request(phone))
-    loop.close()
-    
-    if success:
-        return jsonify({'success': True})
-    else:
-        return jsonify({'success': False, 'error': result})
+    try:
+        success, msg = run_telegram_async(tg_send_code(phone))
+        if success:
+            return jsonify({
+                'success': True,
+                'country': country,
+                'countryName': COUNTRY_PRICES[country]['name'],
+                'price': COUNTRY_PRICES[country]['sell']
+            })
+        return jsonify({'success': False, 'error': msg})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
-@app.route('/api/sell/verify-code', methods=['POST'])
-@verify_token
-def sell_verify_code():
-    data = request.json
+@app.route('/api/sell/verify', methods=['POST'])
+@verify_token_decorator
+def sell_verify():
+    data = request.json or {}
     phone = data.get('phone', '').strip()
     code = data.get('code', '').strip()
     
+    if not phone or not code:
+        return jsonify({'success': False, 'error': 'بيانات ناقصة'})
+    
     country = detect_country(phone)
     if not country:
-        return jsonify({'success': False, 'error': 'الدولة غير مدعومة'})
+        return jsonify({'success': False, 'error': 'دولة غير مدعومة'})
     
-    # Verify code and get session
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    success, message, session_string = loop.run_until_complete(sign_in_with_code(phone, code))
-    loop.close()
-    
-    if not success:
-        return jsonify({'success': False, 'error': message})
-    
-    # Create sell request
-    price = COUNTRY_PRICES[country]['sell']
-    sell_id = firebase_push('sell_requests', {
-        'userId': request.user_id,
-        'username': request.user.get('username'),
-        'phone': phone,
-        'country': country,
-        'price': price,
-        'sessionString': session_string,
-        'status': 'pending',
-        'createdAt': datetime.now().isoformat()
-    })
-    
-    return jsonify({'success': True, 'sellId': sell_id})
+    try:
+        success, msg, session = run_telegram_async(tg_verify_code(phone, code))
+        if not success:
+            return jsonify({'success': False, 'error': msg})
+        
+        price = COUNTRY_PRICES[country]['sell']
+        fb_push('sell_requests', {
+            'userId': request.user_id,
+            'username': request.user.get('username'),
+            'phone': phone,
+            'country': country,
+            'price': price,
+            'session': session,
+            'status': 'pending',
+            'createdAt': datetime.now().isoformat()
+        })
+        
+        return jsonify({'success': True, 'message': 'تم إرسال الطلب'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
-@app.route('/api/deposit/verify', methods=['POST'])
-@verify_token
+# Deposit
+@app.route('/api/deposit', methods=['POST'])
+@verify_token_decorator
 def verify_deposit():
-    data = request.json
+    data = request.json or {}
     txid = data.get('txid', '').strip()
     
-    if not txid.startswith('0x'):
+    if not txid.startswith('0x') or len(txid) < 60:
         return jsonify({'success': False, 'error': 'TXID غير صحيح'})
     
-    # Check if already used
-    deposits = firebase_get('deposits') or {}
-    for dep in deposits.values():
-        if dep.get('txid') == txid:
-            return jsonify({'success': False, 'error': 'هذه المعاملة مستخدمة بالفعل'})
+    deposits = fb_get('deposits') or {}
+    for d in deposits.values():
+        if d and d.get('txid') == txid:
+            return jsonify({'success': False, 'error': 'المعاملة مستخدمة'})
     
-    # Verify transaction
-    valid, amount = verify_bsc_transaction(txid)
-    
+    valid, amount = verify_bsc_tx(txid)
     if not valid:
-        return jsonify({'success': False, 'error': 'لم يتم العثور على المعاملة أو المبلغ أقل من الحد الأدنى'})
+        return jsonify({'success': False, 'error': 'المعاملة غير صالحة'})
     
-    # Add deposit record
-    firebase_push('deposits', {
+    fb_push('deposits', {
         'userId': request.user_id,
-        'username': request.user.get('username'),
         'txid': txid,
         'amount': amount,
         'status': 'approved',
         'createdAt': datetime.now().isoformat()
     })
     
-    # Update user balance
     new_balance = request.user.get('balance', 0) + amount
-    firebase_update(f'users/{request.user_id}', {'balance': new_balance})
+    fb_update(f'users/{request.user_id}', {'balance': new_balance})
     
-    return jsonify({
-        'success': True,
-        'amount': amount,
-        'newBalance': new_balance
-    })
+    return jsonify({'success': True, 'amount': amount, 'newBalance': new_balance})
 
-# Admin routes
-@app.route('/api/admin/pending-sells')
-def admin_pending_sells():
-    sells = firebase_get('sell_requests') or {}
-    
-    pending = []
-    for sid, sell in sells.items():
-        if sell.get('status') == 'pending':
-            pending.append({
-                'id': sid,
-                'phone': sell.get('phone'),
-                'country': sell.get('country'),
-                'price': sell.get('price'),
-                'username': sell.get('username'),
-                'createdAt': sell.get('createdAt')
-            })
-    
-    return jsonify({'items': pending})
+# Admin
+@app.route('/api/admin/sells')
+def admin_sells():
+    sells = fb_get('sell_requests') or {}
+    result = [{'id': k, **v} for k, v in sells.items() if v and v.get('status') == 'pending']
+    return jsonify({'success': True, 'items': result})
 
 @app.route('/api/admin/approve-sell', methods=['POST'])
 def admin_approve_sell():
-    data = request.json
+    data = request.json or {}
     sell_id = data.get('id')
     
-    sell = firebase_get(f'sell_requests/{sell_id}')
+    sell = fb_get(f'sell_requests/{sell_id}')
     if not sell:
-        return jsonify({'success': False, 'error': 'Not found'})
+        return jsonify({'success': False, 'error': 'غير موجود'})
     
-    # Create number for sale
-    buy_price = COUNTRY_PRICES[sell['country']]['buy']
-    firebase_push('numbers', {
+    country = sell.get('country')
+    buy_price = COUNTRY_PRICES.get(country, {}).get('buy', 1.0)
+    
+    fb_push('numbers', {
         'phone': sell['phone'],
-        'country': sell['country'],
+        'country': country,
         'price': buy_price,
-        'sessionString': sell['sessionString'],
+        'session': sell.get('session'),
         'status': 'available',
         'createdAt': datetime.now().isoformat()
     })
     
-    # Update sell request
-    firebase_update(f'sell_requests/{sell_id}', {'status': 'approved'})
+    fb_update(f'sell_requests/{sell_id}', {'status': 'approved'})
     
-    # Add balance to seller
-    user = firebase_get(f"users/{sell['userId']}")
+    user = fb_get(f"users/{sell['userId']}")
     if user:
-        new_balance = user.get('balance', 0) + sell['price']
-        firebase_update(f"users/{sell['userId']}", {'balance': new_balance})
+        new_bal = user.get('balance', 0) + sell['price']
+        fb_update(f"users/{sell['userId']}", {'balance': new_bal})
     
     return jsonify({'success': True})
 
 @app.route('/api/admin/reject-sell', methods=['POST'])
 def admin_reject_sell():
-    data = request.json
-    sell_id = data.get('id')
-    
-    firebase_update(f'sell_requests/{sell_id}', {'status': 'rejected'})
-    
+    data = request.json or {}
+    fb_update(f"sell_requests/{data.get('id')}", {'status': 'rejected'})
     return jsonify({'success': True})
 
-@app.route('/api/admin/pending-deposits')
-def admin_pending_deposits():
-    deposits = firebase_get('deposits') or {}
-    
-    pending = []
-    for did, dep in deposits.items():
-        if dep.get('status') == 'pending':
-            pending.append({
-                'id': did,
-                'txid': dep.get('txid'),
-                'amount': dep.get('amount'),
-                'username': dep.get('username'),
-                'status': dep.get('status')
-            })
-    
-    return jsonify({'items': pending})
-
-@app.route('/api/admin/approve-deposit', methods=['POST'])
-def admin_approve_deposit():
-    data = request.json
-    deposit_id = data.get('id')
-    
-    deposit = firebase_get(f'deposits/{deposit_id}')
-    if not deposit:
-        return jsonify({'success': False, 'error': 'Not found'})
-    
-    # Update deposit status
-    firebase_update(f'deposits/{deposit_id}', {'status': 'approved'})
-    
-    # Add balance to user
-    user = firebase_get(f"users/{deposit['userId']}")
-    if user:
-        new_balance = user.get('balance', 0) + deposit['amount']
-        firebase_update(f"users/{deposit['userId']}", {'balance': new_balance})
-    
-    return jsonify({'success': True})
-
-@app.route('/api/admin/all-numbers')
-def admin_all_numbers():
-    numbers = firebase_get('numbers') or {}
-    
-    items = []
-    for nid, num in numbers.items():
-        items.append({
-            'id': nid,
-            'phone': num.get('phone'),
-            'country': num.get('country'),
-            'status': num.get('status'),
-            'price': num.get('price')
-        })
-    
-    return jsonify({'items': items})
+@app.route('/api/admin/numbers')
+def admin_numbers():
+    numbers = fb_get('numbers') or {}
+    result = [{'id': k, **v} for k, v in numbers.items() if v]
+    return jsonify({'success': True, 'items': result})
 
 @app.route('/api/admin/delete-number', methods=['POST'])
-def admin_delete_number():
-    data = request.json
-    number_id = data.get('id')
-    
-    firebase_delete(f'numbers/{number_id}')
-    
+def admin_delete():
+    data = request.json or {}
+    fb_delete(f"numbers/{data.get('id')}")
     return jsonify({'success': True})
 
-@app.route('/api/admin/send-code', methods=['POST'])
+@app.route('/api/admin/add-send-code', methods=['POST'])
 def admin_send_code():
-    data = request.json
+    data = request.json or {}
     phone = data.get('phone', '').strip()
-    
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    success, result = loop.run_until_complete(send_code_request(phone))
-    loop.close()
-    
-    if success:
-        return jsonify({'success': True})
-    else:
-        return jsonify({'success': False, 'error': result})
+    try:
+        success, msg = run_telegram_async(tg_send_code(phone))
+        return jsonify({'success': success, 'message': msg})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
-@app.route('/api/admin/add-number', methods=['POST'])
-def admin_add_number():
-    data = request.json
+@app.route('/api/admin/add-verify', methods=['POST'])
+def admin_verify():
+    data = request.json or {}
     phone = data.get('phone', '').strip()
     code = data.get('code', '').strip()
     
     country = detect_country(phone)
     if not country:
-        return jsonify({'success': False, 'error': 'الدولة غير مدعومة'})
+        return jsonify({'success': False, 'error': 'دولة غير مدعومة'})
     
-    # Verify code
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    success, message, session_string = loop.run_until_complete(sign_in_with_code(phone, code))
-    loop.close()
-    
-    if not success:
-        return jsonify({'success': False, 'error': message})
-    
-    # Add number
-    price = COUNTRY_PRICES[country]['buy']
-    firebase_push('numbers', {
-        'phone': phone,
-        'country': country,
-        'price': price,
-        'sessionString': session_string,
-        'status': 'available',
-        'createdAt': datetime.now().isoformat()
-    })
-    
-    return jsonify({'success': True})
-
-@app.route('/api/admin/withdrawals')
-def admin_withdrawals():
-    withdrawals = firebase_get('withdrawals') or {}
-    
-    items = []
-    for wid, w in withdrawals.items():
-        items.append({
-            'id': wid,
-            'username': w.get('username'),
-            'amount': w.get('amount'),
-            'address': w.get('address'),
-            'status': w.get('status')
+    try:
+        success, msg, session = run_telegram_async(tg_verify_code(phone, code))
+        if not success:
+            return jsonify({'success': False, 'error': msg})
+        
+        fb_push('numbers', {
+            'phone': phone,
+            'country': country,
+            'price': COUNTRY_PRICES[country]['buy'],
+            'session': session,
+            'status': 'available',
+            'createdAt': datetime.now().isoformat()
         })
-    
-    return jsonify({'items': items})
-
-@app.route('/api/admin/approve-withdrawal', methods=['POST'])
-def admin_approve_withdrawal():
-    data = request.json
-    withdrawal_id = data.get('id')
-    
-    firebase_update(f'withdrawals/{withdrawal_id}', {'status': 'approved'})
-    
-    return jsonify({'success': True})
-
-# Error handler
-@app.errorhandler(Exception)
-def handle_error(e):
-    return jsonify({'success': False, 'error': str(e)}), 500
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)
