@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0d1117">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>TeleNum - أرقام تيليجرام</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -13,18 +14,31 @@
         :root {
             --primary: #0088cc;
             --primary-dark: #006699;
+            --primary-light: #00aaff;
             --secondary: #00c853;
+            --secondary-dark: #00a844;
             --danger: #ff5252;
+            --danger-dark: #d32f2f;
             --warning: #ffab00;
+            --info: #2196f3;
+            --purple: #9c27b0;
             --bg: #0d1117;
-            --bg-card: #161b22;
+            --bg-secondary: #161b22;
+            --bg-card: #1c2128;
             --bg-input: #21262d;
+            --bg-hover: #2d333b;
             --border: #30363d;
+            --border-light: #444c56;
             --text: #f0f6fc;
             --text-secondary: #8b949e;
+            --text-muted: #6e7681;
             --radius: 16px;
             --radius-sm: 12px;
+            --radius-xs: 8px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --header-height: 60px;
+            --nav-height: 70px;
         }
 
         * {
@@ -34,14 +48,24 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: 'Tajawal', sans-serif;
+            font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            min-height: -webkit-fill-available;
+            line-height: 1.6;
             overflow-x: hidden;
         }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
         /* ===== Header ===== */
         .header {
@@ -54,14 +78,18 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
-            padding: 14px 16px;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
         }
 
         .header-inner {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            max-width: 600px;
+            width: 100%;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -72,19 +100,51 @@
             font-size: 1.4rem;
             font-weight: 800;
             color: var(--primary);
+            text-decoration: none;
         }
 
-        .logo i { font-size: 1.6rem; }
+        .logo i { font-size: 1.8rem; }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
         .balance-pill {
             display: flex;
             align-items: center;
             gap: 6px;
-            background: linear-gradient(135deg, var(--secondary), #00a844);
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
             padding: 8px 14px;
             border-radius: 25px;
             font-weight: 700;
             font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .balance-pill:hover { transform: scale(1.05); }
+        .balance-pill i { font-size: 1rem; }
+
+        .header-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .header-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
         }
 
         .auth-btn {
@@ -92,7 +152,7 @@
             align-items: center;
             gap: 6px;
             background: var(--primary);
-            color: #fff;
+            color: white;
             border: none;
             padding: 10px 18px;
             border-radius: 25px;
@@ -100,7 +160,10 @@
             font-weight: 600;
             font-size: 0.9rem;
             cursor: pointer;
+            transition: all 0.2s;
         }
+
+        .auth-btn:hover { background: var(--primary-dark); }
 
         /* ===== Navigation ===== */
         .nav {
@@ -109,16 +172,18 @@
             left: 0;
             right: 0;
             z-index: 100;
-            background: var(--bg-card);
+            background: var(--bg-secondary);
             border-top: 1px solid var(--border);
-            padding: 8px 0;
-            padding-bottom: calc(8px + var(--safe-bottom));
+            height: var(--nav-height);
+            padding-bottom: var(--safe-bottom);
         }
 
         .nav-inner {
             display: flex;
             justify-content: space-around;
-            max-width: 500px;
+            align-items: center;
+            height: 100%;
+            max-width: 600px;
             margin: 0 auto;
         }
 
@@ -126,31 +191,45 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             gap: 4px;
             padding: 8px 12px;
             color: var(--text-secondary);
-            background: none;
-            border: none;
-            font-family: inherit;
+            text-decoration: none;
             font-size: 0.7rem;
             font-weight: 500;
             cursor: pointer;
+            border: none;
+            background: none;
+            font-family: inherit;
             transition: all 0.2s;
             border-radius: var(--radius-sm);
+            min-width: 60px;
         }
 
-        .nav-item i { font-size: 1.3rem; }
+        .nav-item i { font-size: 1.3rem; transition: transform 0.2s; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item.active i { transform: scale(1.15); }
+        .nav-item:hover { color: var(--primary); }
 
-        .nav-item.active {
-            color: var(--primary);
-            background: rgba(0, 136, 204, 0.1);
+        .nav-item .badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-radius: 10px;
+            font-weight: 700;
         }
 
         /* ===== Main ===== */
         .main {
-            padding: 80px 16px calc(80px + var(--safe-bottom));
-            max-width: 600px;
+            padding: calc(var(--header-height) + 16px) 16px calc(var(--nav-height) + 16px + var(--safe-bottom));
+            max-width: 800px;
             margin: 0 auto;
+            min-height: 100vh;
         }
 
         /* ===== Stats ===== */
@@ -161,27 +240,40 @@
             margin-bottom: 20px;
         }
 
+        @media (min-width: 500px) {
+            .stats { grid-template-columns: repeat(4, 1fr); }
+        }
+
         .stat {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 16px;
             text-align: center;
+            transition: all 0.2s;
+        }
+
+        .stat:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
         }
 
         .stat i {
-            font-size: 1.6rem;
-            color: var(--primary);
+            font-size: 1.5rem;
             margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 800;
         }
 
         .stat-label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-secondary);
             margin-top: 2px;
         }
@@ -199,10 +291,16 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
         .section-title {
             font-size: 1.2rem;
             font-weight: 700;
-            margin-bottom: 16px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -210,8 +308,61 @@
 
         .section-title i { color: var(--primary); }
 
+        .section-action {
+            padding: 8px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .section-action:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* ===== Search Box ===== */
+        .search-box {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
         /* ===== Country Cards ===== */
-        .countries { display: grid; gap: 12px; }
+        .countries {
+            display: grid;
+            gap: 10px;
+        }
 
         .country-card {
             background: var(--bg-card);
@@ -223,11 +374,29 @@
             gap: 12px;
             cursor: pointer;
             transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
         }
 
-        .country-card:active {
-            transform: scale(0.98);
-            background: var(--bg-input);
+        .country-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--primary);
+            transform: scaleY(0);
+            transition: transform 0.2s;
+        }
+
+        .country-card:hover::before { transform: scaleY(1); }
+        .country-card:active { transform: scale(0.98); }
+        .country-card:hover { border-color: var(--primary); background: var(--bg-hover); }
+
+        .country-card.out-of-stock {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .country-flag {
@@ -236,18 +405,18 @@
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--border);
+            flex-shrink: 0;
         }
 
-        .country-info { flex: 1; }
+        .country-info { flex: 1; min-width: 0; }
         .country-name { font-weight: 700; font-size: 0.95rem; }
         .country-code { color: var(--text-secondary); font-size: 0.8rem; }
 
-        .country-meta { text-align: left; }
+        .country-meta { text-align: left; flex-shrink: 0; }
         .country-price { font-size: 1.1rem; font-weight: 800; color: var(--secondary); }
 
         .country-stock {
             font-size: 0.75rem;
-            color: var(--text-secondary);
             display: flex;
             align-items: center;
             gap: 4px;
@@ -267,7 +436,21 @@
         }
 
         .form-group { margin-bottom: 18px; }
-        .form-label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; }
+        .form-group:last-child { margin-bottom: 0; }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .form-label span {
+            color: var(--text-secondary);
+            font-weight: 400;
+            font-size: 0.8rem;
+        }
 
         .form-input {
             width: 100%;
@@ -278,16 +461,35 @@
             color: var(--text);
             font-family: inherit;
             font-size: 1rem;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
 
         .form-input:focus {
             outline: none;
             border-color: var(--primary);
+            background: var(--bg);
         }
 
-        .form-input::placeholder { color: var(--text-secondary); }
-        .form-hint { margin-top: 6px; font-size: 0.8rem; color: var(--text-secondary); }
+        .form-input::placeholder { color: var(--text-muted); }
+        .form-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .form-hint {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .form-hint.success { color: var(--secondary); }
+        .form-hint.error { color: var(--danger); }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
 
         /* ===== Buttons ===== */
         .btn {
@@ -304,32 +506,104 @@
             justify-content: center;
             gap: 8px;
             transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn:active:not(:disabled) { transform: scale(0.98); }
 
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; }
-        .btn-success { background: linear-gradient(135deg, var(--secondary), #00a844); color: #fff; }
-        .btn-danger { background: var(--danger); color: #fff; }
-        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            box-shadow: 0 4px 20px rgba(0, 136, 204, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #ff8f00);
+            color: #000;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover:not(:disabled) {
+            background: var(--bg-input);
+            border-color: var(--primary);
+        }
+
+        .btn-sm {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            width: auto;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: var(--radius-xs);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-group .btn { flex: 1; }
 
         /* ===== Alerts ===== */
         .alert {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             padding: 14px;
             border-radius: var(--radius-sm);
             margin-bottom: 16px;
             font-size: 0.9rem;
+            line-height: 1.5;
         }
 
         .alert i { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
 
-        .alert-info { background: rgba(0,136,204,0.15); border: 1px solid rgba(0,136,204,0.3); color: #58a6ff; }
-        .alert-warning { background: rgba(255,171,0,0.15); border: 1px solid rgba(255,171,0,0.3); color: #f0b429; }
-        .alert-success { background: rgba(0,200,83,0.15); border: 1px solid rgba(0,200,83,0.3); color: #3fb950; }
-        .alert-danger { background: rgba(255,82,82,0.15); border: 1px solid rgba(255,82,82,0.3); color: #f85149; }
+        .alert-info {
+            background: rgba(33, 150, 243, 0.15);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            color: #64b5f6;
+        }
+
+        .alert-warning {
+            background: rgba(255, 171, 0, 0.15);
+            border: 1px solid rgba(255, 171, 0, 0.3);
+            color: #ffca28;
+        }
+
+        .alert-success {
+            background: rgba(0, 200, 83, 0.15);
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            color: #69f0ae;
+        }
+
+        .alert-danger {
+            background: rgba(255, 82, 82, 0.15);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            color: #ff8a80;
+        }
 
         /* ===== Wallet ===== */
         .wallet-box {
@@ -345,10 +619,11 @@
 
         .wallet-addr {
             flex: 1;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             font-size: 0.7rem;
-            color: var(--primary);
+            color: var(--primary-light);
             word-break: break-all;
+            line-height: 1.4;
         }
 
         .copy-btn {
@@ -356,29 +631,34 @@
             color: #fff;
             border: none;
             padding: 10px 14px;
-            border-radius: 8px;
+            border-radius: var(--radius-xs);
             cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            flex-shrink: 0;
         }
+
+        .copy-btn:hover { background: var(--primary-dark); }
 
         .qr-box {
             display: flex;
             justify-content: center;
-            margin: 16px 0;
+            margin: 20px 0;
         }
 
         .qr-box img {
             background: #fff;
-            padding: 10px;
+            padding: 12px;
             border-radius: var(--radius-sm);
-            width: 160px;
-            height: 160px;
+            width: 180px;
+            height: 180px;
         }
 
         /* ===== Modal ===== */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             z-index: 200;
@@ -395,8 +675,8 @@
             border: 1px solid var(--border);
             border-radius: var(--radius);
             width: 100%;
-            max-width: 380px;
-            max-height: 85vh;
+            max-width: 420px;
+            max-height: 90vh;
             overflow-y: auto;
             animation: modalIn 0.3s ease;
         }
@@ -410,12 +690,16 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px;
+            padding: 16px 20px;
             border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--bg-card);
+            z-index: 1;
         }
 
         .modal-title {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -431,9 +715,22 @@
             font-size: 1.5rem;
             cursor: pointer;
             padding: 4px;
+            line-height: 1;
+            transition: color 0.2s;
         }
 
-        .modal-body { padding: 16px; }
+        .modal-close:hover { color: var(--danger); }
+
+        .modal-body { padding: 20px; }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-footer .btn { flex: 1; }
 
         /* ===== Code Display ===== */
         .code-box {
@@ -444,111 +741,256 @@
             margin: 16px 0;
         }
 
-        .code-label { font-size: 0.85rem; opacity: 0.9; }
-        .code-value { font-size: 1.6rem; font-weight: 800; font-family: monospace; letter-spacing: 3px; margin-top: 6px; }
+        .code-label { font-size: 0.85rem; opacity: 0.9; margin-bottom: 4px; }
+        .code-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 3px;
+        }
 
         /* ===== Messages ===== */
         .messages-box {
             background: var(--bg-input);
             border-radius: var(--radius-sm);
             padding: 12px;
-            max-height: 180px;
+            max-height: 200px;
             overflow-y: auto;
         }
 
         .msg-item {
-            padding: 10px;
+            padding: 12px;
             border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .msg-item:last-child { border-bottom: none; }
-        .msg-code { font-size: 1.3rem; font-weight: 800; color: var(--primary); font-family: monospace; }
-        .msg-time { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; }
+
+        .msg-code {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary-light);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .msg-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
 
         .waiting {
             text-align: center;
-            padding: 20px;
+            padding: 24px;
         }
 
         .waiting i {
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: var(--warning);
             animation: pulse 1.5s infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
         }
 
-        .waiting p { color: var(--text-secondary); margin-top: 10px; font-size: 0.9rem; }
+        .waiting p { color: var(--text-secondary); margin-top: 12px; font-size: 0.9rem; }
 
         /* ===== Number Card ===== */
         .num-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 14px;
+            padding: 16px;
             margin-bottom: 12px;
         }
 
         .num-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
+            align-items: flex-start;
+            margin-bottom: 12px;
         }
 
-        .num-phone { font-size: 1rem; font-weight: 700; font-family: monospace; direction: ltr; }
+        .num-phone {
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            direction: ltr;
+            color: var(--text);
+        }
+
+        .num-country {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
 
         .badge {
             padding: 4px 10px;
             border-radius: 15px;
             font-size: 0.7rem;
             font-weight: 600;
+            text-transform: uppercase;
         }
 
-        .badge.active { background: rgba(0,200,83,0.2); color: var(--secondary); }
-        .badge.pending { background: rgba(255,171,0,0.2); color: var(--warning); }
-        .badge.completed { background: rgba(0,136,204,0.2); color: var(--primary); }
+        .badge.active { background: rgba(0, 200, 83, 0.2); color: var(--secondary); }
+        .badge.pending { background: rgba(255, 171, 0, 0.2); color: var(--warning); }
+        .badge.completed { background: rgba(0, 136, 204, 0.2); color: var(--primary); }
+        .badge.rejected { background: rgba(255, 82, 82, 0.2); color: var(--danger); }
 
         /* ===== Price Box ===== */
         .price-box {
             background: var(--bg-input);
             border-radius: var(--radius-sm);
-            padding: 14px;
+            padding: 16px;
             text-align: center;
-            margin: 14px 0;
+            margin: 16px 0;
         }
 
         .price-label { font-size: 0.85rem; color: var(--text-secondary); }
-        .price-value { font-size: 1.8rem; font-weight: 800; color: var(--secondary); margin-top: 4px; }
+        .price-value { font-size: 2rem; font-weight: 800; color: var(--secondary); margin-top: 4px; }
 
-        /* ===== Admin ===== */
+        /* ===== Referral Box ===== */
+        .referral-box {
+            background: linear-gradient(135deg, var(--purple), #7b1fa2);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .referral-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .referral-code {
+            background: rgba(255,255,255,0.2);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .referral-code span {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        .referral-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .referral-stat {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: var(--radius-xs);
+            text-align: center;
+        }
+
+        .referral-stat-value { font-size: 1.3rem; font-weight: 800; }
+        .referral-stat-label { font-size: 0.75rem; opacity: 0.8; }
+
+        /* ===== Withdrawal Form ===== */
+        .withdrawal-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .withdrawal-info-item {
+            background: var(--bg-input);
+            padding: 12px;
+            border-radius: var(--radius-xs);
+            text-align: center;
+        }
+
+        .withdrawal-info-item .value { font-size: 1.2rem; font-weight: 700; color: var(--secondary); }
+        .withdrawal-info-item .label { font-size: 0.75rem; color: var(--text-secondary); }
+
+        /* ===== Admin Styles ===== */
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 600px) {
+            .admin-stats { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .admin-stat {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            text-align: center;
+        }
+
+        .admin-stat-value { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        .admin-stat-label { font-size: 0.75rem; color: var(--text-secondary); }
+
         .admin-tabs {
             display: flex;
             gap: 8px;
             margin-bottom: 16px;
             overflow-x: auto;
             padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
         }
 
+        .admin-tabs::-webkit-scrollbar { height: 0; }
+
         .admin-tab {
-            padding: 10px 14px;
+            padding: 10px 16px;
             background: var(--bg-input);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
             color: var(--text);
             font-family: inherit;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 500;
             white-space: nowrap;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
+            transition: all 0.2s;
         }
 
+        .admin-tab:hover { border-color: var(--primary); }
         .admin-tab.active { background: var(--primary); border-color: var(--primary); }
+
+        .admin-tab .count {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
 
         .admin-item {
             background: var(--bg-card);
@@ -558,14 +1000,40 @@
             margin-bottom: 10px;
         }
 
-        .admin-header {
+        .admin-item-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            gap: 12px;
         }
 
-        .admin-phone { font-family: monospace; font-weight: 700; direction: ltr; }
-        .admin-meta { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
+        .admin-item-main { flex: 1; min-width: 0; }
+
+        .admin-item-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .admin-item-phone {
+            font-family: 'Courier New', monospace;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        .admin-item-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .admin-item-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
 
         .admin-actions {
             display: flex;
@@ -577,7 +1045,8 @@
             flex: 1;
             padding: 10px;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-xs);
+            font-family: inherit;
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
@@ -585,12 +1054,50 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            transition: all 0.2s;
         }
 
-        .admin-btn.approve { background: var(--secondary); color: #fff; }
-        .admin-btn.reject { background: var(--danger); color: #fff; }
+        .admin-btn:hover { transform: translateY(-2px); }
+        .admin-btn.approve { background: var(--secondary); color: white; }
+        .admin-btn.reject { background: var(--danger); color: white; }
+        .admin-btn.edit { background: var(--info); color: white; }
+        .admin-btn.delete { background: var(--danger); color: white; }
 
-        /* ===== Auth ===== */
+        /* ===== Data Table ===== */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            background: var(--bg-input);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .data-table tr:hover { background: var(--bg-hover); }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ===== Auth Styles ===== */
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
         .auth-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -600,16 +1107,41 @@
 
         .auth-title {
             text-align: center;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 800;
-            margin-bottom: 24px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .auth-title i { color: var(--primary); }
+
+        .auth-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .auth-divider span { padding: 0 12px; }
 
         .auth-footer {
             text-align: center;
@@ -622,55 +1154,72 @@
             color: var(--primary);
             cursor: pointer;
             font-weight: 600;
+            text-decoration: none;
         }
 
-        /* ===== Empty ===== */
+        .auth-footer a:hover { text-decoration: underline; }
+
+        /* ===== Empty State ===== */
         .empty {
             text-align: center;
             padding: 40px 20px;
             color: var(--text-secondary);
         }
 
-        .empty i { font-size: 3rem; opacity: 0.4; margin-bottom: 16px; }
+        .empty i {
+            font-size: 3.5rem;
+            opacity: 0.3;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .empty p { font-size: 0.95rem; }
 
         /* ===== Toast ===== */
         .toast-container {
             position: fixed;
-            top: 80px;
+            top: calc(var(--header-height) + 10px);
             left: 50%;
             transform: translateX(-50%);
             z-index: 300;
             width: 90%;
-            max-width: 340px;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .toast {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            margin-bottom: 8px;
+            padding: 14px 16px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            gap: 12px;
+            box-shadow: var(--shadow);
             animation: toastIn 0.3s ease;
         }
 
         @keyframes toastIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
+
+        .toast i { font-size: 1.2rem; flex-shrink: 0; }
+        .toast span { flex: 1; font-size: 0.9rem; }
 
         .toast.success { border-color: var(--secondary); }
         .toast.success i { color: var(--secondary); }
         .toast.error { border-color: var(--danger); }
         .toast.error i { color: var(--danger); }
+        .toast.warning { border-color: var(--warning); }
+        .toast.warning i { color: var(--warning); }
 
         /* ===== Spinner ===== */
         .spinner {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border: 3px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
@@ -679,118 +1228,417 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        .spinner-inline {
+            width: 16px;
+            height: 16px;
+            border-width: 2px;
+            margin: 0;
+            display: inline-block;
+        }
+
+        /* ===== Tabs ===== */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: var(--bg-input);
+            padding: 4px;
+            border-radius: var(--radius-sm);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-xs);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--text);
+        }
+
+        /* ===== Misc ===== */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 20px 0;
+        }
+
+        .text-center { text-align: center; }
+        .text-success { color: var(--secondary); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
+        .text-muted { color: var(--text-secondary); }
+        .text-sm { font-size: 0.85rem; }
+        .text-xs { font-size: 0.75rem; }
+        .font-mono { font-family: 'Courier New', monospace; }
+        .font-bold { font-weight: 700; }
+
+        .mt-1 { margin-top: 8px; }
+        .mt-2 { margin-top: 16px; }
+        .mt-3 { margin-top: 24px; }
+        .mb-1 { margin-bottom: 8px; }
+        .mb-2 { margin-bottom: 16px; }
+        .mb-3 { margin-bottom: 24px; }
+
+        .hidden { display: none !important; }
+
+        /* ===== Toggle Switch ===== */
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            cursor: pointer;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: var(--border);
+            border-radius: 26px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle input:checked + .toggle-slider {
+            background: var(--secondary);
+        }
+
+        .toggle input:checked + .toggle-slider::before {
+            transform: translateX(24px);
+        }
+
+        /* ===== Select ===== */
+        .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238b949e' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 16px center;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-inner">
-            <div class="logo"><i class="fab fa-telegram"></i> TeleNum</div>
-            <div id="userArea"></div>
+            <a href="#" class="logo" onclick="showSection('buy'); return false;">
+                <i class="fab fa-telegram"></i>
+                <span>TeleNum</span>
+            </a>
+            <div class="header-actions" id="userArea"></div>
         </div>
     </header>
 
     <!-- Navigation -->
     <nav class="nav">
         <div class="nav-inner">
-            <button class="nav-item active" data-section="buy"><i class="fas fa-shopping-cart"></i> شراء</button>
-            <button class="nav-item" data-section="sell"><i class="fas fa-dollar-sign"></i> بيع</button>
-            <button class="nav-item" data-section="deposit"><i class="fas fa-wallet"></i> إيداع</button>
-            <button class="nav-item" data-section="numbers"><i class="fas fa-mobile-alt"></i> أرقامي</button>
+            <button class="nav-item active" data-section="buy">
+                <i class="fas fa-shopping-cart"></i>
+                <span>شراء</span>
+            </button>
+            <button class="nav-item" data-section="sell">
+                <i class="fas fa-dollar-sign"></i>
+                <span>بيع</span>
+            </button>
+            <button class="nav-item" data-section="wallet">
+                <i class="fas fa-wallet"></i>
+                <span>المحفظة</span>
+            </button>
+            <button class="nav-item" data-section="numbers">
+                <i class="fas fa-mobile-alt"></i>
+                <span>أرقامي</span>
+            </button>
+            <button class="nav-item" data-section="profile">
+                <i class="fas fa-user"></i>
+                <span>حسابي</span>
+            </button>
         </div>
     </nav>
 
     <!-- Main -->
     <main class="main">
         <!-- Stats -->
-        <div class="stats">
-            <div class="stat"><i class="fas fa-globe"></i><div class="stat-value">8</div><div class="stat-label">دولة</div></div>
-            <div class="stat"><i class="fas fa-phone-alt"></i><div class="stat-value" id="statNum">0</div><div class="stat-label">رقم متاح</div></div>
+        <div class="stats" id="statsGrid">
+            <div class="stat">
+                <i class="fas fa-globe"></i>
+                <div class="stat-value" id="statCountries">0</div>
+                <div class="stat-label">دولة</div>
+            </div>
+            <div class="stat">
+                <i class="fas fa-phone-alt"></i>
+                <div class="stat-value" id="statNumbers">0</div>
+                <div class="stat-label">رقم متاح</div>
+            </div>
+            <div class="stat">
+                <i class="fas fa-check-double"></i>
+                <div class="stat-value" id="statSold">0</div>
+                <div class="stat-label">تم البيع</div>
+            </div>
+            <div class="stat">
+                <i class="fas fa-users"></i>
+                <div class="stat-value" id="statUsers">0</div>
+                <div class="stat-label">مستخدم</div>
+            </div>
         </div>
 
-        <!-- Buy -->
+        <!-- Buy Section -->
         <section class="section active" id="secBuy">
-            <h2 class="section-title"><i class="fas fa-shopping-cart"></i> شراء رقم</h2>
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-shopping-cart"></i> شراء رقم</h2>
+            </div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchCountry" placeholder="ابحث عن دولة..." oninput="filterCountries()">
+            </div>
             <div class="countries" id="countriesList"></div>
         </section>
 
-        <!-- Sell -->
+        <!-- Sell Section -->
         <section class="section" id="secSell">
-            <h2 class="section-title"><i class="fas fa-dollar-sign"></i> بيع رقمك</h2>
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-dollar-sign"></i> بيع رقمك</h2>
+            </div>
             <div class="form-card">
-                <div class="alert alert-info"><i class="fas fa-info-circle"></i><span>بع رقمك واحصل على رصيد فوري</span></div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>قم ببيع رقم تيليجرام الخاص بك واحصل على رصيد فوري بعد الموافقة</div>
+                </div>
                 <form id="sellForm">
                     <div class="form-group">
-                        <label class="form-label">رقم الهاتف</label>
+                        <label class="form-label">رقم الهاتف <span>(مع كود الدولة)</span></label>
                         <input type="tel" class="form-input" id="sellPhone" placeholder="+1234567890" dir="ltr" required>
                         <div class="form-hint" id="sellHint"></div>
                     </div>
-                    <div class="form-group" id="sellCodeGrp" style="display:none;">
-                        <label class="form-label">كود التحقق</label>
+                    <div class="form-group hidden" id="sellCodeGrp">
+                        <label class="form-label">كود التحقق من تيليجرام</label>
                         <input type="text" class="form-input" id="sellCode" placeholder="12345" dir="ltr" maxlength="6">
                     </div>
-                    <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i>
-                        <div><strong>شروط:</strong><ul style="margin:6px 0 0 18px;font-size:0.85rem;"><li>بدون 2FA</li><li>بدون إيميل</li><li>سجل خروج بعد الإرسال</li></ul></div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            <strong>شروط البيع:</strong>
+                            <ul style="margin: 8px 0 0 20px; font-size: 0.85rem;">
+                                <li>بدون تحقق بخطوتين (2FA)</li>
+                                <li>بدون ربط بريد إلكتروني</li>
+                                <li>سجل خروج من جميع الأجهزة بعد الإرسال</li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="price-box" id="sellPriceBox" style="display:none;"><div class="price-label">السعر</div><div class="price-value" id="sellPriceVal">$0</div></div>
-                    <button type="submit" class="btn btn-primary" id="sellBtn"><i class="fas fa-paper-plane"></i> إرسال</button>
+                    <div class="price-box hidden" id="sellPriceBox">
+                        <div class="price-label">السعر المتوقع</div>
+                        <div class="price-value" id="sellPriceVal">$0.00</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="sellBtn">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>إرسال الطلب</span>
+                    </button>
                 </form>
             </div>
         </section>
 
-        <!-- Deposit -->
-        <section class="section" id="secDeposit">
-            <h2 class="section-title"><i class="fas fa-wallet"></i> إيداع</h2>
-            <div class="form-card">
-                <div class="alert alert-info"><i class="fas fa-info-circle"></i><span>أرسل USDT (BEP-20) - الحد الأدنى $1.50</span></div>
-                <div class="wallet-box">
-                    <span class="wallet-addr">0x8E00A980274Cfb22798290586d97F7D185E3092D</span>
-                    <button type="button" class="copy-btn" onclick="copyWallet()"><i class="fas fa-copy"></i></button>
+        <!-- Wallet Section -->
+        <section class="section" id="secWallet">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-wallet"></i> المحفظة</h2>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showWalletTab('deposit')">إيداع</button>
+                <button class="tab-btn" onclick="showWalletTab('withdraw')">سحب</button>
+                <button class="tab-btn" onclick="showWalletTab('history')">السجل</button>
+            </div>
+
+            <!-- Deposit Tab -->
+            <div id="walletDeposit" class="form-card">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>أرسل USDT عبر شبكة BEP-20 (BSC) - الحد الأدنى $1.50</span>
                 </div>
-                <div class="qr-box"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=0x8E00A980274Cfb22798290586d97F7D185E3092D" alt="QR"></div>
+                <div class="wallet-box">
+                    <span class="wallet-addr" id="walletAddr">0x8E00A980274Cfb22798290586d97F7D185E3092D</span>
+                    <button type="button" class="copy-btn" onclick="copyWallet()">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <div class="qr-box">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=0x8E00A980274Cfb22798290586d97F7D185E3092D" alt="QR">
+                </div>
                 <form id="depositForm">
                     <div class="form-group">
-                        <label class="form-label">TXID</label>
+                        <label class="form-label">رقم المعاملة (TXID)</label>
                         <input type="text" class="form-input" id="txidInput" placeholder="0x..." dir="ltr" required>
+                        <div class="form-hint">أدخل TXID بعد إتمام التحويل للتحقق التلقائي</div>
                     </div>
-                    <button type="submit" class="btn btn-primary" id="depositBtn"><i class="fas fa-check-circle"></i> تحقق</button>
+                    <button type="submit" class="btn btn-primary" id="depositBtn">
+                        <i class="fas fa-check-circle"></i>
+                        <span>تحقق وإيداع</span>
+                    </button>
                 </form>
+            </div>
+
+            <!-- Withdraw Tab -->
+            <div id="walletWithdraw" class="form-card hidden">
+                <div class="withdrawal-info">
+                    <div class="withdrawal-info-item">
+                        <div class="value" id="withdrawBalance">$0.00</div>
+                        <div class="label">رصيدك الحالي</div>
+                    </div>
+                    <div class="withdrawal-info-item">
+                        <div class="value">$2.00</div>
+                        <div class="label">الحد الأدنى</div>
+                    </div>
+                </div>
+                <form id="withdrawForm">
+                    <div class="form-group">
+                        <label class="form-label">المبلغ (USD)</label>
+                        <input type="number" class="form-input" id="withdrawAmount" placeholder="0.00" step="0.01" min="2" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">عنوان المحفظة (BEP-20)</label>
+                        <input type="text" class="form-input" id="withdrawAddress" placeholder="0x..." dir="ltr" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="withdrawBtn">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>طلب سحب</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- History Tab -->
+            <div id="walletHistory" class="hidden">
+                <div id="historyList"></div>
             </div>
         </section>
 
-        <!-- My Numbers -->
+        <!-- My Numbers Section -->
         <section class="section" id="secNumbers">
-            <h2 class="section-title"><i class="fas fa-mobile-alt"></i> أرقامي</h2>
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-mobile-alt"></i> أرقامي</h2>
+            </div>
             <div id="myNumList"></div>
         </section>
 
-        <!-- Admin -->
+        <!-- Profile Section -->
+        <section class="section" id="secProfile">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-user"></i> حسابي</h2>
+            </div>
+            <div id="profileContent"></div>
+        </section>
+
+        <!-- Admin Section -->
         <section class="section" id="secAdmin">
-            <h2 class="section-title"><i class="fas fa-shield-alt"></i> الإدارة</h2>
+            <div class="admin-header">
+                <h2 class="section-title"><i class="fas fa-shield-alt"></i> لوحة الإدارة</h2>
+                <button class="section-action" onclick="loadAdminDashboard()">
+                    <i class="fas fa-sync-alt"></i> تحديث
+                </button>
+            </div>
+            <div class="admin-stats" id="adminStats"></div>
             <div class="admin-tabs" id="adminTabs"></div>
             <div id="adminContent"></div>
         </section>
 
-        <!-- Auth -->
+        <!-- Auth Section -->
         <section class="section" id="secAuth">
-            <div class="auth-card" id="loginCard">
-                <h2 class="auth-title"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</h2>
-                <form id="loginForm">
-                    <div class="form-group"><label class="form-label">البريد</label><input type="email" class="form-input" id="loginEmail" required></div>
-                    <div class="form-group"><label class="form-label">كلمة المرور</label><input type="password" class="form-input" id="loginPass" required></div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> دخول</button>
-                </form>
-                <div class="auth-footer">ليس لديك حساب؟ <a onclick="showReg()">إنشاء</a></div>
-            </div>
-            <div class="auth-card" id="regCard" style="display:none;">
-                <h2 class="auth-title"><i class="fas fa-user-plus"></i> حساب جديد</h2>
-                <form id="regForm">
-                    <div class="form-group"><label class="form-label">الاسم</label><input type="text" class="form-input" id="regName" required></div>
-                    <div class="form-group"><label class="form-label">البريد</label><input type="email" class="form-input" id="regEmail" required></div>
-                    <div class="form-group"><label class="form-label">كلمة المرور</label><input type="password" class="form-input" id="regPass" required minlength="6"></div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> إنشاء</button>
-                </form>
-                <div class="auth-footer">لديك حساب؟ <a onclick="showLogin()">دخول</a></div>
+            <div class="auth-container">
+                <!-- Login -->
+                <div class="auth-card" id="loginCard">
+                    <h2 class="auth-title"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</h2>
+                    <p class="auth-subtitle">مرحباً بعودتك!</p>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-input" id="loginEmail" placeholder="email@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">كلمة المرور</label>
+                            <input type="password" class="form-input" id="loginPass" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>تسجيل الدخول</span>
+                        </button>
+                    </form>
+                    <div class="auth-footer">
+                        ليس لديك حساب؟ <a onclick="showRegister()">إنشاء حساب جديد</a>
+                    </div>
+                </div>
+
+                <!-- Register -->
+                <div class="auth-card hidden" id="regCard">
+                    <h2 class="auth-title"><i class="fas fa-user-plus"></i> حساب جديد</h2>
+                    <p class="auth-subtitle">انضم إلينا اليوم!</p>
+                    <form id="regForm">
+                        <div class="form-group">
+                            <label class="form-label">اسم المستخدم</label>
+                            <input type="text" class="form-input" id="regName" placeholder="أحمد" required minlength="3">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-input" id="regEmail" placeholder="email@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">كلمة المرور</label>
+                            <input type="password" class="form-input" id="regPass" placeholder="••••••••" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">كود الإحالة <span>(اختياري)</span></label>
+                            <input type="text" class="form-input" id="regReferral" placeholder="XXXXX">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i>
+                            <span>إنشاء حساب</span>
+                        </button>
+                    </form>
+                    <div class="auth-footer">
+                        لديك حساب بالفعل؟ <a onclick="showLogin()">تسجيل الدخول</a>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -799,7 +1647,7 @@
     <div class="modal-overlay" id="modal">
         <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title"><i class="fas fa-shopping-cart"></i> <span id="modalTitle">شراء</span></h3>
+                <h3 class="modal-title" id="modalTitle"><i class="fas fa-shopping-cart"></i> <span>شراء</span></h3>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body" id="modalBody"></div>
@@ -810,394 +1658,1797 @@
     <div class="toast-container" id="toasts"></div>
 
     <script>
+        // ==================== Config ====================
         const API = '/api';
         const WALLET = '0x8E00A980274Cfb22798290586d97F7D185E3092D';
-        let user = null, isAdmin = false, countries = [], pollers = {};
 
-        // Init
+        // ==================== State ====================
+        let user = null;
+        let isAdmin = false;
+        let countries = [];
+        let pollers = {};
+        let settings = {};
+
+        // ==================== Fingerprint ====================
+        async function generateFingerprint() {
+            const fp = {
+                screen: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                language: navigator.language,
+                platform: navigator.platform,
+                cookieEnabled: navigator.cookieEnabled,
+                doNotTrack: navigator.doNotTrack
+            };
+
+            // Canvas fingerprint
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillText('TeleNum Fingerprint', 2, 2);
+                fp.canvas = canvas.toDataURL().slice(-50);
+            } catch (e) { fp.canvas = ''; }
+
+            // WebGL fingerprint
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl');
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                fp.webgl = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            } catch (e) { fp.webgl = ''; }
+
+            return fp;
+        }
+
+        function setFingerprintHeaders(headers) {
+            generateFingerprint().then(fp => {
+                headers['X-Screen-Data'] = fp.screen || '';
+                headers['X-Timezone'] = fp.timezone || '';
+                headers['X-Canvas-Hash'] = fp.canvas || '';
+                headers['X-WebGL-Hash'] = fp.webgl || '';
+            });
+        }
+
+        // ==================== Init ====================
         document.addEventListener('DOMContentLoaded', init);
 
-        function init() {
+        async function init() {
             checkAdmin();
+            await loadSettings();
             loadUser();
-            loadCountries();
-            loadStats();
+            await loadCountries();
+            await loadStats();
             setupEvents();
+            checkReferralCode();
         }
 
         function checkAdmin() {
-            if (new URLSearchParams(location.search).get('admin') === 'true') {
+            const params = new URLSearchParams(location.search);
+            if (params.get('admin') === 'true') {
                 isAdmin = true;
-                document.querySelector('.nav-inner').innerHTML += `<button class="nav-item" data-section="admin"><i class="fas fa-shield-alt"></i> إدارة</button>`;
-                document.getElementById('adminTabs').innerHTML = `
-                    <button class="admin-tab active" data-tab="sells"><i class="fas fa-clock"></i> طلبات</button>
-                    <button class="admin-tab" data-tab="nums"><i class="fas fa-list"></i> أرقام</button>
-                    <button class="admin-tab" data-tab="add"><i class="fas fa-plus"></i> إضافة</button>`;
+                const navInner = document.querySelector('.nav-inner');
+                const adminBtn = document.createElement('button');
+                adminBtn.className = 'nav-item';
+                adminBtn.setAttribute('data-section', 'admin');
+                adminBtn.innerHTML = '<i class="fas fa-shield-alt"></i><span>إدارة</span>';
+                navInner.appendChild(adminBtn);
             }
         }
 
+        function checkReferralCode() {
+            const params = new URLSearchParams(location.search);
+            const ref = params.get('ref');
+            if (ref) {
+                localStorage.setItem('referralCode', ref);
+                document.getElementById('regReferral').value = ref;
+            }
+        }
+
+        async function loadSettings() {
+            try {
+                const r = await fetch(`${API}/settings`);
+                settings = await r.json();
+            } catch (e) { console.error(e); }
+        }
+
+        // ==================== User ====================
         function loadUser() {
-            const s = localStorage.getItem('tg_user');
-            if (s) { user = JSON.parse(s); }
+            const stored = localStorage.getItem('tg_user');
+            if (stored) {
+                try {
+                    user = JSON.parse(stored);
+                    refreshUserData();
+                } catch (e) {
+                    localStorage.removeItem('tg_user');
+                }
+            }
             updateUserArea();
         }
 
-        function updateUserArea() {
-            const a = document.getElementById('userArea');
-            a.innerHTML = user ? `<div class="balance-pill"><i class="fas fa-coins"></i> $${(user.balance||0).toFixed(2)}</div>` : `<button class="auth-btn" data-section="auth"><i class="fas fa-user"></i> دخول</button>`;
+        async function refreshUserData() {
+            if (!user?.token) return;
+            try {
+                const r = await fetch(`${API}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${user.token}` }
+                });
+                const d = await r.json();
+                if (d.success) {
+                    user = { ...user, ...d.user };
+                    localStorage.setItem('tg_user', JSON.stringify(user));
+                    updateUserArea();
+                }
+            } catch (e) { }
         }
 
+        function updateUserArea() {
+            const area = document.getElementById('userArea');
+            if (user) {
+                area.innerHTML = `
+                    <div class="balance-pill" onclick="showSection('wallet')">
+                        <i class="fas fa-coins"></i>
+                        <span>$${(user.balance || 0).toFixed(2)}</span>
+                    </div>
+                    <button class="header-btn" onclick="logout()" title="تسجيل الخروج">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                `;
+            } else {
+                area.innerHTML = `
+                    <button class="auth-btn" onclick="showSection('auth')">
+                        <i class="fas fa-user"></i>
+                        <span>دخول</span>
+                    </button>
+                `;
+            }
+        }
+
+        function logout() {
+            user = null;
+            localStorage.removeItem('tg_user');
+            updateUserArea();
+            showSection('buy');
+            toast('تم تسجيل الخروج', 'success');
+        }
+
+        // ==================== Events ====================
         function setupEvents() {
-            document.querySelectorAll('[data-section]').forEach(b => b.addEventListener('click', () => {
-                showSection(b.dataset.section);
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                if (b.classList.contains('nav-item')) b.classList.add('active');
-            }));
-            document.getElementById('adminTabs')?.addEventListener('click', e => {
-                const t = e.target.closest('.admin-tab');
-                if (t) { document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active')); t.classList.add('active'); loadAdminTab(t.dataset.tab); }
+            // Navigation
+            document.querySelectorAll('[data-section]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const section = btn.dataset.section;
+                    showSection(section);
+                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                    if (btn.classList.contains('nav-item')) btn.classList.add('active');
+                });
             });
+
+            // Forms
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            document.getElementById('regForm').addEventListener('submit', handleReg);
+            document.getElementById('regForm').addEventListener('submit', handleRegister);
             document.getElementById('sellForm').addEventListener('submit', handleSell);
             document.getElementById('depositForm').addEventListener('submit', handleDeposit);
+            document.getElementById('withdrawForm').addEventListener('submit', handleWithdraw);
+
+            // Sell phone input
             document.getElementById('sellPhone').addEventListener('input', detectSellCountry);
         }
 
+        // ==================== Navigation ====================
         function showSection(name) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            const sec = document.getElementById('sec' + name.charAt(0).toUpperCase() + name.slice(1));
-            if (sec) { sec.classList.add('active'); if (name === 'admin' && isAdmin) loadAdminTab('sells'); if (name === 'numbers' && user) loadMyNumbers(); }
+            
+            const sectionMap = {
+                'buy': 'secBuy',
+                'sell': 'secSell',
+                'wallet': 'secWallet',
+                'numbers': 'secNumbers',
+                'profile': 'secProfile',
+                'admin': 'secAdmin',
+                'auth': 'secAuth'
+            };
+            
+            const secId = sectionMap[name];
+            const section = document.getElementById(secId);
+            
+            if (section) {
+                section.classList.add('active');
+                
+                // Load section-specific content
+                if (name === 'admin' && isAdmin) {
+                    loadAdminDashboard();
+                }
+                if (name === 'numbers' && user) {
+                    loadMyNumbers();
+                }
+                if (name === 'profile' && user) {
+                    loadProfile();
+                }
+                if (name === 'wallet' && user) {
+                    document.getElementById('withdrawBalance').textContent = `$${(user.balance || 0).toFixed(2)}`;
+                }
+            }
         }
 
+        // ==================== Countries ====================
         async function loadCountries() {
             try {
                 const r = await fetch(`${API}/countries`);
                 const d = await r.json();
                 countries = d.countries || [];
                 renderCountries();
-            } catch(e) { console.error(e); }
+            } catch (e) { console.error(e); }
         }
 
-        function renderCountries() {
-            document.getElementById('countriesList').innerHTML = countries.map(c => {
-                let sc = c.stock > 5 ? 'in-stock' : c.stock > 0 ? 'low' : 'out';
-                return `<div class="country-card" onclick="openBuy('${c.code}')">
-                    <img src="https://flagcdn.com/w80/${c.flag}.png" class="country-flag">
-                    <div class="country-info"><div class="country-name">${c.name}</div><div class="country-code">${c.phoneCode}</div></div>
-                    <div class="country-meta"><div class="country-price">$${c.buyPrice.toFixed(2)}</div><div class="country-stock ${sc}"><i class="fas fa-box"></i> ${c.stock}</div></div>
-                </div>`;
+        function renderCountries(filter = '') {
+            const list = document.getElementById('countriesList');
+            const filtered = countries.filter(c => 
+                !filter || 
+                c.name.includes(filter) || 
+                c.code.toLowerCase().includes(filter.toLowerCase()) ||
+                c.phoneCode.includes(filter)
+            );
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-search"></i><p>لا توجد نتائج</p></div>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(c => {
+                const stockClass = c.stock > 5 ? 'in-stock' : c.stock > 0 ? 'low' : 'out';
+                const outOfStock = c.stock === 0;
+                
+                return `
+                    <div class="country-card ${outOfStock ? 'out-of-stock' : ''}" onclick="${outOfStock ? '' : `openBuyModal('${c.code}')`}">
+                        <img src="https://flagcdn.com/w80/${c.flag}.png" class="country-flag" alt="${c.name}" onerror="this.src='https://via.placeholder.com/44'">
+                        <div class="country-info">
+                            <div class="country-name">${c.name}</div>
+                            <div class="country-code">${c.phoneCode}</div>
+                        </div>
+                        <div class="country-meta">
+                            <div class="country-price">$${c.buyPrice.toFixed(2)}</div>
+                            <div class="country-stock ${stockClass}">
+                                <i class="fas fa-${outOfStock ? 'times-circle' : 'box'}"></i>
+                                <span>${outOfStock ? 'نفذ' : c.stock + ' متاح'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
             }).join('');
         }
 
-        async function loadStats() {
-            try { const r = await fetch(`${API}/stats`); const d = await r.json(); document.getElementById('statNum').textContent = d.availableNumbers || 0; } catch(e) {}
+        function filterCountries() {
+            const filter = document.getElementById('searchCountry').value.trim();
+            renderCountries(filter);
         }
 
-        // Buy
-        function openBuy(code) {
-            if (!user) { toast('سجل دخول أولاً', 'error'); showSection('auth'); return; }
+        // ==================== Stats ====================
+        async function loadStats() {
+            try {
+                const r = await fetch(`${API}/stats`);
+                const d = await r.json();
+                document.getElementById('statCountries').textContent = d.totalCountries || countries.length;
+                document.getElementById('statNumbers').textContent = d.availableNumbers || 0;
+                document.getElementById('statSold').textContent = d.soldNumbers || 0;
+                document.getElementById('statUsers').textContent = d.totalUsers || 0;
+            } catch (e) { }
+        }
+
+        // ==================== Buy ====================
+        function openBuyModal(code) {
+            if (!user) {
+                toast('يرجى تسجيل الدخول أولاً', 'error');
+                showSection('auth');
+                return;
+            }
+
             const c = countries.find(x => x.code === code);
-            if (!c) return;
+            if (!c || c.stock === 0) return;
+
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-shopping-cart"></i> <span>شراء رقم</span>';
             document.getElementById('modalBody').innerHTML = `
-                <div style="text-align:center;margin-bottom:16px;"><img src="https://flagcdn.com/w80/${c.flag}.png" style="width:56px;border-radius:50%;"><h3 style="margin-top:10px;">${c.name}</h3><p style="color:var(--text-secondary);">${c.phoneCode}</p></div>
-                <div class="price-box"><div class="price-label">السعر</div><div class="price-value">$${c.buyPrice.toFixed(2)}</div></div>
-                <button class="btn btn-success" onclick="confirmBuy('${code}')" ${c.stock===0?'disabled':''}><i class="fas fa-check"></i> ${c.stock===0?'غير متوفر':'تأكيد'}</button>`;
+                <div class="text-center mb-2">
+                    <img src="https://flagcdn.com/w80/${c.flag}.png" style="width: 64px; border-radius: 50%; margin-bottom: 12px;" onerror="this.src='https://via.placeholder.com/64'">
+                    <h3 style="margin-bottom: 4px;">${c.name}</h3>
+                    <p class="text-muted">${c.phoneCode}</p>
+                </div>
+                <div class="price-box">
+                    <div class="price-label">السعر</div>
+                    <div class="price-value">$${c.buyPrice.toFixed(2)}</div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>ستتمكن من استلام أكواد التحقق فوراً بعد الشراء</span>
+                </div>
+                <button class="btn btn-success" onclick="confirmBuy('${code}')">
+                    <i class="fas fa-check"></i>
+                    <span>تأكيد الشراء</span>
+                </button>
+            `;
             openModal();
         }
 
         async function confirmBuy(code) {
             const c = countries.find(x => x.code === code);
-            if ((user.balance||0) < c.buyPrice) { toast('رصيد غير كافٍ', 'error'); closeModal(); showSection('deposit'); return; }
-            document.getElementById('modalBody').innerHTML = `<div class="waiting"><i class="fas fa-spinner fa-spin"></i><p>جاري الشراء...</p></div>`;
+            if (!c) return;
+
+            if ((user.balance || 0) < c.buyPrice) {
+                toast('رصيدك غير كافٍ', 'error');
+                closeModal();
+                showSection('wallet');
+                return;
+            }
+
+            document.getElementById('modalBody').innerHTML = `
+                <div class="waiting">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>جاري الشراء...</p>
+                </div>
+            `;
+
             try {
-                const r = await fetch(`${API}/buy`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` }, body: JSON.stringify({ country: code }) });
+                const r = await fetch(`${API}/buy`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${user.token}` 
+                    },
+                    body: JSON.stringify({ country: code })
+                });
+
                 const d = await r.json();
+
                 if (d.success) {
-                    user.balance = d.newBalance; localStorage.setItem('tg_user', JSON.stringify(user)); updateUserArea(); loadCountries();
+                    user.balance = d.newBalance;
+                    localStorage.setItem('tg_user', JSON.stringify(user));
+                    updateUserArea();
+                    loadCountries();
+                    loadStats();
+
                     document.getElementById('modalBody').innerHTML = `
-                        <div style="text-align:center;"><i class="fas fa-check-circle" style="font-size:2.5rem;color:var(--secondary);"></i><h3 style="margin:12px 0;">تم الشراء!</h3></div>
-                        <div class="code-box"><div class="code-label">الرقم</div><div class="code-value">${d.phone}</div></div>
-                        <div class="messages-box" id="msgBox"><div class="waiting"><i class="fas fa-spinner fa-spin"></i><p>انتظار الكود...</p></div></div>
-                        <button class="btn btn-success" onclick="completePurchase('${d.purchaseId}')" style="margin-top:12px;"><i class="fas fa-check"></i> تم الدخول</button>
-                        <button class="btn btn-outline" onclick="closeModal()" style="margin-top:8px;">إغلاق</button>`;
-                    startPolling(d.purchaseId);
-                } else { throw new Error(d.error); }
-            } catch(e) { document.getElementById('modalBody').innerHTML = `<div class="alert alert-danger"><i class="fas fa-times-circle"></i>${e.message}</div><button class="btn btn-outline" onclick="closeModal()">إغلاق</button>`; }
+                        <div class="text-center mb-2">
+                            <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--secondary);"></i>
+                            <h3 style="margin: 12px 0;">تم الشراء بنجاح!</h3>
+                        </div>
+                        <div class="code-box">
+                            <div class="code-label">رقم الهاتف</div>
+                            <div class="code-value">${d.phone}</div>
+                        </div>
+                        <div class="messages-box" id="msgBox">
+                            <div class="waiting">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>جاري انتظار كود التحقق...</p>
+                            </div>
+                        </div>
+                        <div class="btn-group mt-2">
+                            <button class="btn btn-success" onclick="completePurchase('${d.purchaseId}')">
+                                <i class="fas fa-check"></i> تم الدخول
+                            </button>
+                            <button class="btn btn-outline" onclick="closeModal()">إغلاق</button>
+                        </div>
+                    `;
+
+                    startMessagePolling(d.purchaseId);
+                } else {
+                    throw new Error(d.error || 'حدث خطأ');
+                }
+            } catch (e) {
+                document.getElementById('modalBody').innerHTML = `
+                    <div class="text-center">
+                        <i class="fas fa-times-circle" style="font-size: 3rem; color: var(--danger);"></i>
+                        <h3 style="margin: 12px 0;">فشل الشراء</h3>
+                        <p class="text-muted">${e.message}</p>
+                    </div>
+                    <button class="btn btn-outline mt-2" onclick="closeModal()">إغلاق</button>
+                `;
+            }
         }
 
-        function startPolling(id) {
+        function startMessagePolling(purchaseId) {
             const poll = async () => {
                 try {
-                    const r = await fetch(`${API}/messages/${id}`, { headers: { 'Authorization': `Bearer ${user.token}` } });
+                    const r = await fetch(`${API}/messages/${purchaseId}`, {
+                        headers: { 'Authorization': `Bearer ${user.token}` }
+                    });
                     const d = await r.json();
                     const box = document.getElementById('msgBox');
+                    
                     if (box && d.messages?.length) {
-                        box.innerHTML = d.messages.map(m => `<div class="msg-item"><div class="msg-code">${m.code}</div><div class="msg-time">${new Date(m.timestamp).toLocaleString('ar')}</div></div>`).join('');
+                        box.innerHTML = d.messages.map(m => `
+                            <div class="msg-item">
+                                <div class="msg-code">${m.code}</div>
+                                <div class="msg-time">${new Date(m.timestamp).toLocaleString('ar')}</div>
+                            </div>
+                        `).join('');
                     }
-                } catch(e) {}
+                } catch (e) { }
             };
+
             poll();
-            pollers[id] = setInterval(poll, 3000);
+            pollers[purchaseId] = setInterval(poll, 3000);
         }
 
-        async function completePurchase(id) {
-            if (pollers[id]) { clearInterval(pollers[id]); delete pollers[id]; }
-            try { await fetch(`${API}/complete`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` }, body: JSON.stringify({ purchaseId: id }) }); toast('تم!', 'success'); closeModal(); } catch(e) { toast('خطأ', 'error'); }
+        async function completePurchase(purchaseId) {
+            if (pollers[purchaseId]) {
+                clearInterval(pollers[purchaseId]);
+                delete pollers[purchaseId];
+            }
+
+            try {
+                                await fetch(`${API}/complete`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${user.token}` 
+                    },
+                    body: JSON.stringify({ purchaseId })
+                });
+                toast('تم تأكيد الاستخدام بنجاح', 'success');
+                closeModal();
+                loadMyNumbers();
+            } catch (e) {
+                toast('حدث خطأ', 'error');
+            }
         }
 
-        function openModal() { document.getElementById('modal').classList.add('active'); }
-        function closeModal() { document.getElementById('modal').classList.remove('active'); Object.values(pollers).forEach(p => clearInterval(p)); pollers = {}; }
+        function openModal() {
+            document.getElementById('modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
 
-        // Auth
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.body.style.overflow = '';
+            Object.keys(pollers).forEach(k => {
+                clearInterval(pollers[k]);
+                delete pollers[k];
+            });
+        }
+
+        // ==================== Auth ====================
         async function handleLogin(e) {
             e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الدخول...';
+
             try {
-                const r = await fetch(`${API}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPass').value }) });
+                const r = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('loginEmail').value,
+                        password: document.getElementById('loginPass').value
+                    })
+                });
                 const d = await r.json();
-                if (d.success) { user = d.user; localStorage.setItem('tg_user', JSON.stringify(user)); updateUserArea(); showSection('buy'); toast('مرحباً!', 'success'); } else { toast(d.error, 'error'); }
-            } catch(e) { toast('خطأ', 'error'); }
+
+                if (d.success) {
+                    user = d.user;
+                    localStorage.setItem('tg_user', JSON.stringify(user));
+                    updateUserArea();
+                    showSection('buy');
+                    toast(`مرحباً ${user.username}!`, 'success');
+                    e.target.reset();
+                } else {
+                    toast(d.error || 'بيانات غير صحيحة', 'error');
+                }
+            } catch (err) {
+                toast('حدث خطأ في الاتصال', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
 
-        async function handleReg(e) {
+        async function handleRegister(e) {
             e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإنشاء...';
+
+            const referralCode = document.getElementById('regReferral').value || localStorage.getItem('referralCode') || '';
+
             try {
-                const r = await fetch(`${API}/auth/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: document.getElementById('regName').value, email: document.getElementById('regEmail').value, password: document.getElementById('regPass').value }) });
+                const r = await fetch(`${API}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('regName').value,
+                        email: document.getElementById('regEmail').value,
+                        password: document.getElementById('regPass').value,
+                        referralCode: referralCode
+                    })
+                });
                 const d = await r.json();
-                if (d.success) { user = d.user; localStorage.setItem('tg_user', JSON.stringify(user)); updateUserArea(); showSection('buy'); toast('تم إنشاء الحساب!', 'success'); } else { toast(d.error, 'error'); }
-            } catch(e) { toast('خطأ', 'error'); }
+
+                if (d.success) {
+                    user = d.user;
+                    localStorage.setItem('tg_user', JSON.stringify(user));
+                    localStorage.removeItem('referralCode');
+                    updateUserArea();
+                    showSection('buy');
+                    toast('تم إنشاء الحساب بنجاح!', 'success');
+                    e.target.reset();
+                } else {
+                    toast(d.error || 'حدث خطأ', 'error');
+                }
+            } catch (err) {
+                toast('حدث خطأ في الاتصال', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
 
-        function showLogin() { document.getElementById('loginCard').style.display = 'block'; document.getElementById('regCard').style.display = 'none'; }
-        function showReg() { document.getElementById('loginCard').style.display = 'none'; document.getElementById('regCard').style.display = 'block'; }
+        function showLogin() {
+            document.getElementById('loginCard').classList.remove('hidden');
+            document.getElementById('regCard').classList.add('hidden');
+        }
 
-        // Sell
+        function showRegister() {
+            document.getElementById('loginCard').classList.add('hidden');
+            document.getElementById('regCard').classList.remove('hidden');
+        }
+
+        // ==================== Sell ====================
         function detectSellCountry() {
-            const p = document.getElementById('sellPhone').value;
-            const h = document.getElementById('sellHint');
-            const pb = document.getElementById('sellPriceBox');
-            const pv = document.getElementById('sellPriceVal');
-            let c = null;
-            if (p.startsWith('+49')) c = 'DE';
-            else if (p.startsWith('+44')) c = 'UK';
-            else if (p.startsWith('+33')) c = 'FR';
-            else if (p.startsWith('+31')) c = 'NL';
-            else if (p.startsWith('+48')) c = 'PL';
-            else if (p.startsWith('+61')) c = 'AU';
-            else if (p.startsWith('+1')) c = 'US';
-            const co = countries.find(x => x.code === c);
-            if (co) { h.textContent = co.name; pb.style.display = 'block'; pv.textContent = '$' + co.sellPrice.toFixed(2); } else { h.textContent = ''; pb.style.display = 'none'; }
+            const phone = document.getElementById('sellPhone').value.trim();
+            const hint = document.getElementById('sellHint');
+            const priceBox = document.getElementById('sellPriceBox');
+            const priceVal = document.getElementById('sellPriceVal');
+
+            if (!phone.startsWith('+')) {
+                hint.innerHTML = '';
+                priceBox.classList.add('hidden');
+                return;
+            }
+
+            // Find matching country
+            let matched = null;
+            for (const c of countries) {
+                if (phone.startsWith(c.phoneCode)) {
+                    if (!matched || c.phoneCode.length > matched.phoneCode.length) {
+                        matched = c;
+                    }
+                }
+            }
+
+            if (matched) {
+                hint.innerHTML = `<i class="fas fa-flag"></i> ${matched.name}`;
+                hint.className = 'form-hint success';
+                priceBox.classList.remove('hidden');
+                priceVal.textContent = `$${matched.sellPrice.toFixed(2)}`;
+            } else {
+                hint.innerHTML = '<i class="fas fa-exclamation-circle"></i> دولة غير مدعومة';
+                hint.className = 'form-hint error';
+                priceBox.classList.add('hidden');
+            }
         }
 
         async function handleSell(e) {
             e.preventDefault();
-            if (!user) { toast('سجل دخول', 'error'); showSection('auth'); return; }
-            const phone = document.getElementById('sellPhone').value;
-            const cg = document.getElementById('sellCodeGrp');
-            const code = document.getElementById('sellCode').value;
+            
+            if (!user) {
+                toast('يرجى تسجيل الدخول أولاً', 'error');
+                showSection('auth');
+                return;
+            }
+
+            const phone = document.getElementById('sellPhone').value.trim();
+            const codeGrp = document.getElementById('sellCodeGrp');
+            const code = document.getElementById('sellCode').value.trim();
             const btn = document.getElementById('sellBtn');
-            if (cg.style.display === 'none') {
-                btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> إرسال...';
+            const originalText = btn.innerHTML;
+
+            if (codeGrp.classList.contains('hidden')) {
+                // Step 1: Send code
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+
                 try {
-                    const r = await fetch(`${API}/sell/send-code`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` }, body: JSON.stringify({ phone }) });
+                    const r = await fetch(`${API}/sell/send-code`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${user.token}`
+                        },
+                        body: JSON.stringify({ phone })
+                    });
                     const d = await r.json();
-                    if (d.success) { cg.style.display = 'block'; btn.innerHTML = '<i class="fas fa-check"></i> تأكيد'; toast('تم إرسال الكود', 'success'); } else { throw new Error(d.error); }
-                } catch(er) { toast(er.message, 'error'); btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال'; }
+
+                    if (d.success) {
+                        codeGrp.classList.remove('hidden');
+                        btn.innerHTML = '<i class="fas fa-check"></i> تأكيد الكود';
+                        toast('تم إرسال كود التحقق إلى تيليجرام', 'success');
+                    } else {
+                        throw new Error(d.error);
+                    }
+                } catch (err) {
+                    toast(err.message || 'حدث خطأ', 'error');
+                    btn.innerHTML = originalText;
+                }
+
                 btn.disabled = false;
             } else {
-                if (code.length < 5) { toast('أدخل الكود', 'error'); return; }
-                btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> تحقق...';
+                // Step 2: Verify code
+                if (code.length < 5) {
+                    toast('يرجى إدخال الكود الصحيح', 'error');
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
+
                 try {
-                    const r = await fetch(`${API}/sell/verify`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` }, body: JSON.stringify({ phone, code }) });
+                    const r = await fetch(`${API}/sell/verify`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${user.token}`
+                        },
+                        body: JSON.stringify({ phone, code })
+                    });
                     const d = await r.json();
-                    if (d.success) { toast('تم إرسال الطلب!', 'success'); document.getElementById('sellForm').reset(); cg.style.display = 'none'; document.getElementById('sellHint').textContent = ''; document.getElementById('sellPriceBox').style.display = 'none'; } else { throw new Error(d.error); }
-                } catch(er) { toast(er.message, 'error'); }
-                btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال';
+
+                    if (d.success) {
+                        toast('تم إرسال الطلب! سيتم مراجعته قريباً', 'success');
+                        e.target.reset();
+                        codeGrp.classList.add('hidden');
+                        document.getElementById('sellHint').innerHTML = '';
+                        document.getElementById('sellPriceBox').classList.add('hidden');
+                    } else {
+                        throw new Error(d.error);
+                    }
+                } catch (err) {
+                    toast(err.message || 'حدث خطأ', 'error');
+                }
+
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> <span>إرسال الطلب</span>';
             }
         }
 
-        // Deposit
-        async function handleDeposit(e) {
-            e.preventDefault();
-            if (!user) { toast('سجل دخول', 'error'); showSection('auth'); return; }
-            const txid = document.getElementById('txidInput').value.trim();
-            const btn = document.getElementById('depositBtn');
-            if (!txid.startsWith('0x') || txid.length < 60) { toast('TXID غير صحيح', 'error'); return; }
-                        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> تحقق...';
-            try {
-                const r = await fetch(`${API}/deposit`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` }, body: JSON.stringify({ txid }) });
-                const d = await r.json();
-                if (d.success) { user.balance = d.newBalance; localStorage.setItem('tg_user', JSON.stringify(user)); updateUserArea(); toast(`تم إيداع $${d.amount.toFixed(2)}`, 'success'); document.getElementById('txidInput').value = ''; } else { throw new Error(d.error); }
-            } catch(er) { toast(er.message, 'error'); }
-            btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle"></i> تحقق';
+        // ==================== Wallet ====================
+        function showWalletTab(tab) {
+            document.querySelectorAll('#secWallet .tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('walletDeposit').classList.add('hidden');
+            document.getElementById('walletWithdraw').classList.add('hidden');
+            document.getElementById('walletHistory').classList.add('hidden');
+
+            if (tab === 'deposit') {
+                document.getElementById('walletDeposit').classList.remove('hidden');
+            } else if (tab === 'withdraw') {
+                document.getElementById('walletWithdraw').classList.remove('hidden');
+                if (user) {
+                    document.getElementById('withdrawBalance').textContent = `$${(user.balance || 0).toFixed(2)}`;
+                }
+            } else if (tab === 'history') {
+                document.getElementById('walletHistory').classList.remove('hidden');
+                loadWalletHistory();
+            }
         }
 
-        function copyWallet() { navigator.clipboard.writeText(WALLET); toast('تم النسخ', 'success'); }
+        async function handleDeposit(e) {
+            e.preventDefault();
 
-        // My Numbers
+            if (!user) {
+                toast('يرجى تسجيل الدخول أولاً', 'error');
+                showSection('auth');
+                return;
+            }
+
+            const txid = document.getElementById('txidInput').value.trim();
+            const btn = document.getElementById('depositBtn');
+            const originalText = btn.innerHTML;
+
+            if (!txid.startsWith('0x') || txid.length < 60) {
+                toast('TXID غير صحيح', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
+
+            try {
+                const r = await fetch(`${API}/deposit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${user.token}`
+                    },
+                    body: JSON.stringify({ txid })
+                });
+                const d = await r.json();
+
+                if (d.success) {
+                    user.balance = d.newBalance;
+                    localStorage.setItem('tg_user', JSON.stringify(user));
+                    updateUserArea();
+                    toast(`تم إيداع $${d.amount.toFixed(2)} بنجاح!`, 'success');
+                    document.getElementById('txidInput').value = '';
+                } else {
+                    throw new Error(d.error);
+                }
+            } catch (err) {
+                toast(err.message || 'حدث خطأ', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+
+        async function handleWithdraw(e) {
+            e.preventDefault();
+
+            if (!user) {
+                toast('يرجى تسجيل الدخول أولاً', 'error');
+                showSection('auth');
+                return;
+            }
+
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const address = document.getElementById('withdrawAddress').value.trim();
+            const btn = document.getElementById('withdrawBtn');
+            const originalText = btn.innerHTML;
+
+            if (amount < 2) {
+                toast('الحد الأدنى للسحب $2.00', 'error');
+                return;
+            }
+
+            if (amount > (user.balance || 0)) {
+                toast('رصيدك غير كافٍ', 'error');
+                return;
+            }
+
+            if (!address.startsWith('0x') || address.length !== 42) {
+                toast('عنوان المحفظة غير صحيح', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+
+            try {
+                const r = await fetch(`${API}/withdraw`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${user.token}`
+                    },
+                    body: JSON.stringify({ amount, address })
+                });
+                const d = await r.json();
+
+                if (d.success) {
+                    user.balance = d.newBalance;
+                    localStorage.setItem('tg_user', JSON.stringify(user));
+                    updateUserArea();
+                    document.getElementById('withdrawBalance').textContent = `$${d.newBalance.toFixed(2)}`;
+                    toast('تم إرسال طلب السحب بنجاح', 'success');
+                    e.target.reset();
+                } else {
+                    throw new Error(d.error);
+                }
+            } catch (err) {
+                toast(err.message || 'حدث خطأ', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+
+        async function loadWalletHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                const r = await fetch(`${API}/my-withdrawals`, {
+                    headers: { 'Authorization': `Bearer ${user.token}` }
+                });
+                const d = await r.json();
+
+                if (d.withdrawals?.length) {
+                    list.innerHTML = d.withdrawals.map(w => `
+                        <div class="admin-item">
+                            <div class="admin-item-header">
+                                <div class="admin-item-main">
+                                    <div class="admin-item-title">$${w.amount.toFixed(2)}</div>
+                                    <div class="admin-item-meta">
+                                        <span><i class="fas fa-wallet"></i> ${w.address?.slice(0, 10)}...</span>
+                                        <span><i class="fas fa-clock"></i> ${new Date(w.createdAt).toLocaleDateString('ar')}</span>
+                                    </div>
+                                </div>
+                                <span class="badge ${w.status}">${getStatusText(w.status)}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<div class="empty"><i class="fas fa-history"></i><p>لا يوجد سجل</p></div>';
+                }
+            } catch (e) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-exclamation-circle"></i><p>حدث خطأ</p></div>';
+            }
+        }
+
+        function copyWallet() {
+            navigator.clipboard.writeText(WALLET);
+            toast('تم نسخ العنوان', 'success');
+        }
+
+        // ==================== My Numbers ====================
         async function loadMyNumbers() {
             const list = document.getElementById('myNumList');
             list.innerHTML = '<div class="spinner"></div>';
+
+            if (!user) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-sign-in-alt"></i><p>يرجى تسجيل الدخول</p></div>';
+                return;
+            }
+
             try {
-                const r = await fetch(`${API}/my-numbers`, { headers: { 'Authorization': `Bearer ${user.token}` } });
+                const r = await fetch(`${API}/my-numbers`, {
+                    headers: { 'Authorization': `Bearer ${user.token}` }
+                });
                 const d = await r.json();
+
                 if (d.numbers?.length) {
                     list.innerHTML = d.numbers.map(n => {
-                        const co = countries.find(x => x.code === n.country);
-                        return `<div class="num-card">
-                            <div class="num-header">
-                                <div><div class="num-phone">${n.phone}</div><div style="color:var(--text-secondary);font-size:0.8rem;">${co?.name || n.country}</div></div>
-                                <span class="badge ${n.status}">${n.status === 'active' ? 'نشط' : n.status === 'completed' ? 'مكتمل' : 'معلق'}</span>
+                        const c = countries.find(x => x.code === n.country);
+                        return `
+                            <div class="num-card">
+                                <div class="num-header">
+                                    <div>
+                                        <div class="num-phone">${n.phone}</div>
+                                        <div class="num-country">${c?.name || n.country}</div>
+                                    </div>
+                                    <span class="badge ${n.status}">${getStatusText(n.status)}</span>
+                                </div>
+                                ${n.status === 'active' ? `
+                                    <div class="messages-box" id="nm${n.id}">
+                                        <div class="waiting"><i class="fas fa-spinner fa-spin"></i></div>
+                                    </div>
+                                    <button class="btn btn-success mt-1" onclick="completePurchase('${n.id}')">
+                                        <i class="fas fa-check"></i> تم الدخول - إنهاء
+                                    </button>
+                                ` : ''}
                             </div>
-                            ${n.status === 'active' ? `
-                                <div class="messages-box" id="nm${n.id}"><div class="waiting"><i class="fas fa-spinner fa-spin"></i></div></div>
-                                <button class="btn btn-success" onclick="completePurchase('${n.id}')" style="margin-top:10px;"><i class="fas fa-check"></i> تم الدخول</button>
-                            ` : ''}
-                        </div>`;
+                        `;
                     }).join('');
-                    d.numbers.filter(n => n.status === 'active').forEach(n => pollNum(n.id));
-                } else { list.innerHTML = '<div class="empty"><i class="fas fa-mobile-alt"></i><p>لا توجد أرقام</p></div>'; }
-            } catch(e) { list.innerHTML = '<div class="empty"><i class="fas fa-exclamation-circle"></i><p>خطأ</p></div>'; }
-        }
 
-        function pollNum(id) {
-            const poll = async () => {
-                try {
-                    const r = await fetch(`${API}/messages/${id}`, { headers: { 'Authorization': `Bearer ${user.token}` } });
-                    const d = await r.json();
-                    const box = document.getElementById('nm' + id);
-                    if (box && d.messages?.length) {
-                        box.innerHTML = d.messages.map(m => `<div class="msg-item"><div class="msg-code">${m.code}</div><div class="msg-time">${new Date(m.timestamp).toLocaleString('ar')}</div></div>`).join('');
-                    } else if (box) {
-                        box.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:12px;">انتظار...</p>';
-                    }
-                } catch(e) {}
-            };
-            poll();
-            pollers['n' + id] = setInterval(poll, 3000);
-        }
-
-        // Admin
-        async function loadAdminTab(tab) {
-            const content = document.getElementById('adminContent');
-            content.innerHTML = '<div class="spinner"></div>';
-            try {
-                if (tab === 'sells') {
-                    const r = await fetch(`${API}/admin/sells`);
-                    const d = await r.json();
-                    if (d.items?.length) {
-                        content.innerHTML = d.items.map(i => `
-                            <div class="admin-item">
-                                <div class="admin-header">
-                                    <div><div class="admin-phone">${i.phone}</div><div class="admin-meta">${countries.find(x=>x.code===i.country)?.name || i.country} • $${i.price} • ${i.username}</div></div>
-                                </div>
-                                <div class="admin-actions">
-                                    <button class="admin-btn approve" onclick="approveSell('${i.id}')"><i class="fas fa-check"></i> موافقة</button>
-                                    <button class="admin-btn reject" onclick="rejectSell('${i.id}')"><i class="fas fa-times"></i> رفض</button>
-                                </div>
-                            </div>
-                        `).join('');
-                    } else { content.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><p>لا توجد طلبات</p></div>'; }
-                } else if (tab === 'nums') {
-                    const r = await fetch(`${API}/admin/numbers`);
-                    const d = await r.json();
-                    if (d.items?.length) {
-                        content.innerHTML = d.items.map(i => `
-                            <div class="admin-item">
-                                <div class="admin-header">
-                                    <div><div class="admin-phone">${i.phone}</div><div class="admin-meta">${countries.find(x=>x.code===i.country)?.name || i.country} • $${i.price} • ${i.status}</div></div>
-                                    <button class="admin-btn reject" onclick="deleteNum('${i.id}')" style="flex:0;"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-                        `).join('');
-                    } else { content.innerHTML = '<div class="empty"><i class="fas fa-list"></i><p>لا توجد أرقام</p></div>'; }
-                } else if (tab === 'add') {
-                    content.innerHTML = `
-                        <div class="form-card">
-                            <div class="alert alert-info"><i class="fas fa-info-circle"></i><span>إضافة رقم جديد للبيع</span></div>
-                            <form id="addForm">
-                                <div class="form-group">
-                                    <label class="form-label">رقم الهاتف</label>
-                                    <input type="tel" class="form-input" id="addPhone" placeholder="+1234567890" dir="ltr" required>
-                                </div>
-                                <div class="form-group" id="addCodeGrp" style="display:none;">
-                                    <label class="form-label">كود التحقق</label>
-                                    <input type="text" class="form-input" id="addCode" placeholder="12345" dir="ltr" maxlength="6">
-                                </div>
-                                <button type="submit" class="btn btn-primary" id="addBtn"><i class="fas fa-paper-plane"></i> إرسال الكود</button>
-                            </form>
-                        </div>
-                    `;
-                    document.getElementById('addForm').addEventListener('submit', handleAddNumber);
+                    // Start polling for active numbers
+                    d.numbers.filter(n => n.status === 'active').forEach(n => pollNumberMessages(n.id));
+                } else {
+                    list.innerHTML = '<div class="empty"><i class="fas fa-mobile-alt"></i><p>لا توجد أرقام مشتراة</p></div>';
                 }
-            } catch(e) { content.innerHTML = '<div class="empty"><i class="fas fa-exclamation-circle"></i><p>خطأ</p></div>'; }
-        }
-
-        async function approveSell(id) {
-            try {
-                const r = await fetch(`${API}/admin/approve-sell`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
-                const d = await r.json();
-                if (d.success) { toast('تمت الموافقة', 'success'); loadAdminTab('sells'); loadCountries(); } else { throw new Error(d.error); }
-            } catch(e) { toast(e.message, 'error'); }
-        }
-
-        async function rejectSell(id) {
-            try {
-                const r = await fetch(`${API}/admin/reject-sell`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
-                const d = await r.json();
-                if (d.success) { toast('تم الرفض', 'success'); loadAdminTab('sells'); } else { throw new Error(d.error); }
-            } catch(e) { toast(e.message, 'error'); }
-        }
-
-        async function deleteNum(id) {
-            if (!confirm('حذف هذا الرقم؟')) return;
-            try {
-                const r = await fetch(`${API}/admin/delete-number`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
-                const d = await r.json();
-                if (d.success) { toast('تم الحذف', 'success'); loadAdminTab('nums'); loadCountries(); } else { throw new Error(d.error); }
-            } catch(e) { toast(e.message, 'error'); }
-        }
-
-        async function handleAddNumber(e) {
-            e.preventDefault();
-            const phone = document.getElementById('addPhone').value;
-            const cg = document.getElementById('addCodeGrp');
-            const code = document.getElementById('addCode').value;
-            const btn = document.getElementById('addBtn');
-
-            if (cg.style.display === 'none') {
-                btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> إرسال...';
-                try {
-                    const r = await fetch(`${API}/admin/add-send-code`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone }) });
-                    const d = await r.json();
-                    if (d.success) { cg.style.display = 'block'; btn.innerHTML = '<i class="fas fa-check"></i> تأكيد وإضافة'; toast('تم إرسال الكود', 'success'); } else { throw new Error(d.error || d.message); }
-                } catch(er) { toast(er.message, 'error'); btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الكود'; }
-                btn.disabled = false;
-            } else {
-                if (code.length < 5) { toast('أدخل الكود', 'error'); return; }
-                btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> إضافة...';
-                try {
-                    const r = await fetch(`${API}/admin/add-verify`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone, code }) });
-                    const d = await r.json();
-                    if (d.success) { toast('تمت الإضافة!', 'success'); document.getElementById('addForm').reset(); cg.style.display = 'none'; loadCountries(); loadAdminTab('nums'); } else { throw new Error(d.error); }
-                } catch(er) { toast(er.message, 'error'); }
-                btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الكود';
+            } catch (e) {
+                list.innerHTML = '<div class="empty"><i class="fas fa-exclamation-circle"></i><p>حدث خطأ</p></div>';
             }
         }
 
-        // Toast
-        function toast(msg, type = 'success') {
-            const c = document.getElementById('toasts');
-            const t = document.createElement('div');
-            t.className = `toast ${type}`;
-            t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i><span>${msg}</span>`;
-            c.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
+        function pollNumberMessages(numId) {
+            const poll = async () => {
+                const box = document.getElementById('nm' + numId);
+                if (!box) return;
+
+                try {
+                    const r = await fetch(`${API}/messages/${numId}`, {
+                        headers: { 'Authorization': `Bearer ${user.token}` }
+                    });
+                    const d = await r.json();
+
+                    if (d.messages?.length) {
+                        box.innerHTML = d.messages.map(m => `
+                            <div class="msg-item">
+                                <div class="msg-code">${m.code}</div>
+                                <div class="msg-time">${new Date(m.timestamp).toLocaleString('ar')}</div>
+                            </div>
+                        `).join('');
+                    } else {
+                        box.innerHTML = '<p class="text-center text-muted" style="padding: 16px;">انتظار الرسائل...</p>';
+                    }
+                } catch (e) { }
+            };
+
+            poll();
+            pollers['n' + numId] = setInterval(poll, 3000);
         }
 
-        // Cleanup on page unload
+        function getStatusText(status) {
+            const map = {
+                'active': 'نشط',
+                'pending': 'قيد المراجعة',
+                'completed': 'مكتمل',
+                'approved': 'تمت الموافقة',
+                'rejected': 'مرفوض',
+                'available': 'متاح',
+                'sold': 'مباع'
+            };
+            return map[status] || status;
+        }
+
+        // ==================== Profile ====================
+        async function loadProfile() {
+            const content = document.getElementById('profileContent');
+
+            if (!user) {
+                content.innerHTML = '<div class="empty"><i class="fas fa-sign-in-alt"></i><p>يرجى تسجيل الدخول</p></div>';
+                return;
+            }
+
+            await refreshUserData();
+
+            content.innerHTML = `
+                <!-- Referral Box -->
+                <div class="referral-box">
+                    <div class="referral-title"><i class="fas fa-gift"></i> برنامج الإحالة</div>
+                    <div class="referral-code">
+                        <span>${user.referralCode || 'N/A'}</span>
+                        <button class="copy-btn" onclick="copyReferralLink()"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="referral-stats">
+                        <div class="referral-stat">
+                            <div class="referral-stat-value">${user.referralCount || 0}</div>
+                            <div class="referral-stat-label">إحالة</div>
+                        </div>
+                        <div class="referral-stat">
+                            <div class="referral-stat-value">$${(user.referralEarnings || 0).toFixed(2)}</div>
+                            <div class="referral-stat-label">أرباح</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Info -->
+                <div class="form-card">
+                    <h3 class="mb-2"><i class="fas fa-user"></i> معلومات الحساب</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">اسم المستخدم</label>
+                        <input type="text" class="form-input" value="${user.username}" disabled>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">البريد الإلكتروني</label>
+                        <input type="email" class="form-input" value="${user.email}" disabled>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">الرصيد الحالي</label>
+                        <input type="text" class="form-input" value="$${(user.balance || 0).toFixed(2)}" disabled>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">إجمالي المشتريات</label>
+                            <div class="text-center font-bold">${user.totalPurchases || 0}</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">إجمالي المبيعات</label>
+                            <div class="text-center font-bold">${user.totalSales || 0}</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-danger mt-2" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                    </button>
+                </div>
+            `;
+        }
+
+        function copyReferralLink() {
+            if (!user?.referralCode) return;
+            const link = `${location.origin}?ref=${user.referralCode}`;
+            navigator.clipboard.writeText(link);
+            toast('تم نسخ رابط الإحالة', 'success');
+        }
+
+        // ==================== Admin ====================
+        async function loadAdminDashboard() {
+            if (!isAdmin) return;
+
+            // Load stats
+            try {
+                const r = await fetch(`${API}/admin/dashboard?admin=true`);
+                const d = await r.json();
+
+                if (d.success) {
+                    document.getElementById('adminStats').innerHTML = `
+                        <div class="admin-stat">
+                            <div class="admin-stat-value">${d.stats.totalUsers}</div>
+                            <div class="admin-stat-label">المستخدمين</div>
+                        </div>
+                        <div class="admin-stat">
+                            <div class="admin-stat-value">${d.stats.availableNumbers}</div>
+                            <div class="admin-stat-label">أرقام متاحة</div>
+                        </div>
+                        <div class="admin-stat">
+                            <div class="admin-stat-value">${d.stats.pendingSells}</div>
+                            <div class="admin-stat-label">طلبات بيع</div>
+                        </div>
+                        <div class="admin-stat">
+                            <div class="admin-stat-value">${d.stats.pendingWithdrawals}</div>
+                            <div class="admin-stat-label">طلبات سحب</div>
+                        </div>
+                    `;
+                }
+            } catch (e) { }
+
+            // Setup tabs
+            document.getElementById('adminTabs').innerHTML = `
+                <button class="admin-tab active" data-tab="sells"><i class="fas fa-clock"></i> طلبات البيع</button>
+                <button class="admin-tab" data-tab="withdrawals"><i class="fas fa-money-bill"></i> السحوبات</button>
+                <button class="admin-tab" data-tab="users"><i class="fas fa-users"></i> المستخدمين</button>
+                <button class="admin-tab" data-tab="numbers"><i class="fas fa-phone"></i> الأرقام</button>
+                <button class="admin-tab" data-tab="countries"><i class="fas fa-globe"></i> الدول</button>
+                <button class="admin-tab" data-tab="settings"><i class="fas fa-cog"></i> الإعدادات</button>
+                <button class="admin-tab" data-tab="add"><i class="fas fa-plus"></i> إضافة رقم</button>
+            `;
+
+            // Tab click handler
+            document.getElementById('adminTabs').onclick = (e) => {
+                const tab = e.target.closest('.admin-tab');
+                if (tab) {
+                    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    loadAdminTab(tab.dataset.tab);
+                }
+            };
+
+            loadAdminTab('sells');
+        }
+
+        async function loadAdminTab(tab) {
+            const content = document.getElementById('adminContent');
+            content.innerHTML = '<div class="spinner"></div>';
+
+            try {
+                switch (tab) {
+                    case 'sells':
+                        await loadAdminSells(content);
+                        break;
+                    case 'withdrawals':
+                        await loadAdminWithdrawals(content);
+                        break;
+                    case 'users':
+                        await loadAdminUsers(content);
+                        break;
+                    case 'numbers':
+                        await loadAdminNumbers(content);
+                        break;
+                    case 'countries':
+                        await loadAdminCountries(content);
+                        break;
+                    case 'settings':
+                        await loadAdminSettings(content);
+                        break;
+                    case 'add':
+                        loadAdminAddNumber(content);
+                        break;
+                }
+            } catch (e) {
+                content.innerHTML = '<div class="empty"><i class="fas fa-exclamation-circle"></i><p>حدث خطأ</p></div>';
+            }
+        }
+
+        async function loadAdminSells(content) {
+            const r = await fetch(`${API}/admin/sells?admin=true`);
+            const d = await r.json();
+
+            if (d.items?.length) {
+                content.innerHTML = d.items.map(s => `
+                    <div class="admin-item">
+                        <div class="admin-item-header">
+                            <div class="admin-item-main">
+                                <div class="admin-item-title admin-item-phone">${s.phone}</div>
+                                <div class="admin-item-meta">
+                                    <span><i class="fas fa-flag"></i> ${countries.find(c => c.code === s.country)?.name || s.country}</span>
+                                    <span><i class="fas fa-dollar-sign"></i> $${s.price}</span>
+                                    <span><i class="fas fa-user"></i> ${s.username}</span>
+                                </div>
+                            </div>
+                            <span class="badge pending">قيد المراجعة</span>
+                        </div>
+                        <div class="admin-actions">
+                            <button class="admin-btn approve" onclick="adminApproveSell('${s.id}')">
+                                <i class="fas fa-check"></i> موافقة
+                            </button>
+                            <button class="admin-btn reject" onclick="adminRejectSell('${s.id}')">
+                                <i class="fas fa-times"></i> رفض
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                content.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><p>لا توجد طلبات</p></div>';
+            }
+        }
+
+        async function loadAdminWithdrawals(content) {
+            const r = await fetch(`${API}/admin/withdrawals?admin=true`);
+            const d = await r.json();
+
+            if (d.items?.length) {
+                content.innerHTML = d.items.map(w => `
+                    <div class="admin-item">
+                        <div class="admin-item-header">
+                            <div class="admin-item-main">
+                                <div class="admin-item-title">$${w.amount.toFixed(2)}</div>
+                                <div class="admin-item-meta">
+                                    <span><i class="fas fa-user"></i> ${w.username}</span>
+                                    <span><i class="fas fa-wallet"></i> ${w.address?.slice(0, 15)}...</span>
+                                </div>
+                            </div>
+                            <span class="badge ${w.status}">${getStatusText(w.status)}</span>
+                        </div>
+                        ${w.status === 'pending' ? `
+                            <div class="admin-actions">
+                                <button class="admin-btn approve" onclick="adminApproveWithdrawal('${w.id}')">
+                                    <i class="fas fa-check"></i> موافقة
+                                </button>
+                                <button class="admin-btn reject" onclick="adminRejectWithdrawal('${w.id}')">
+                                    <i class="fas fa-times"></i> رفض
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } else {
+                content.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><p>لا توجد طلبات</p></div>';
+            }
+        }
+
+        async function loadAdminUsers(content) {
+            const r = await fetch(`${API}/admin/users?admin=true`);
+            const d = await r.json();
+
+            if (d.users?.length) {
+                content.innerHTML = `
+                    <div class="search-box mb-2">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="ابحث عن مستخدم..." onkeyup="filterUsers(this.value)">
+                    </div>
+                    <div id="usersList">
+                        ${d.users.map(u => `
+                            <div class="admin-item user-item" data-name="${u.username}" data-email="${u.email}">
+                                <div class="admin-item-header">
+                                    <div class="admin-item-main">
+                                        <div class="admin-item-title">${u.username} ${u.banned ? '<span class="badge rejected">محظور</span>' : ''}</div>
+                                        <div class="admin-item-meta">
+                                            <span><i class="fas fa-envelope"></i> ${u.email}</span>
+                                            <span><i class="fas fa-coins"></i> $${(u.balance || 0).toFixed(2)}</span>
+                                            <span><i class="fas fa-users"></i> ${u.referralCount || 0} إحالة</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="admin-actions">
+                                    <button class="admin-btn edit" onclick="openEditUserModal('${u.id}', '${u.username}', ${u.balance || 0}, ${u.banned || false})">
+                                        <i class="fas fa-edit"></i> تعديل
+                                    </button>
+                                    ${u.banned ? `
+                                        <button class="admin-btn approve" onclick="adminUnbanUser('${u.id}')">
+                                            <i class="fas fa-unlock"></i> رفع الحظر
+                                        </button>
+                                    ` : `
+                                        <button class="admin-btn reject" onclick="adminBanUser('${u.id}')">
+                                            <i class="fas fa-ban"></i> حظر
+                                        </button>
+                                    `}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                content.innerHTML = '<div class="empty"><i class="fas fa-users"></i><p>لا يوجد مستخدمين</p></div>';
+            }
+        }
+
+        function filterUsers(query) {
+            const items = document.querySelectorAll('.user-item');
+            items.forEach(item => {
+                const name = item.dataset.name?.toLowerCase() || '';
+                const email = item.dataset.email?.toLowerCase() || '';
+                const q = query.toLowerCase();
+                item.style.display = (name.includes(q) || email.includes(q)) ? '' : 'none';
+            });
+        }
+
+        async function loadAdminNumbers(content) {
+            const r = await fetch(`${API}/admin/numbers?admin=true`);
+            const d = await r.json();
+
+            if (d.items?.length) {
+                content.innerHTML = d.items.map(n => `
+                    <div class="admin-item">
+                        <div class="admin-item-header">
+                            <div class="admin-item-main">
+                                <div class="admin-item-title admin-item-phone">${n.phone}</div>
+                                <div class="admin-item-meta">
+                                    <span><i class="fas fa-flag"></i> ${countries.find(c => c.code === n.country)?.name || n.country}</span>
+                                    <span><i class="fas fa-dollar-sign"></i> $${n.price}</span>
+                                </div>
+                            </div>
+                            <span class="badge ${n.status}">${getStatusText(n.status)}</span>
+                        </div>
+                        <div class="admin-actions">
+                            <button class="admin-btn delete" onclick="adminDeleteNumber('${n.id}')">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                content.innerHTML = '<div class="empty"><i class="fas fa-phone"></i><p>لا توجد أرقام</p></div>';
+            }
+        }
+
+        async function loadAdminCountries(content) {
+            const r = await fetch(`${API}/admin/countries?admin=true`);
+            const d = await r.json();
+
+            content.innerHTML = `
+                <button class="btn btn-primary mb-2" onclick="openAddCountryModal()">
+                    <i class="fas fa-plus"></i> إضافة دولة جديدة
+                </button>
+                <div id="countriesList">
+                    ${d.countries?.map(c => `
+                        <div class="admin-item">
+                            <div class="admin-item-header">
+                                <div class="admin-item-main" style="display: flex; align-items: center; gap: 12px;">
+                                    <img src="https://flagcdn.com/w40/${c.flag}.png" style="width: 32px; border-radius: 4px;">
+                                    <div>
+                                        <div class="admin-item-title">${c.name} (${c.code})</div>
+                                        <div class="admin-item-meta">
+                                            <span><i class="fas fa-phone"></i> ${c.phoneCode}</span>
+                                            <span><i class="fas fa-arrow-down"></i> شراء: $${c.buyPrice}</span>
+                                            <span><i class="fas fa-arrow-up"></i> بيع: $${c.sellPrice}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="badge ${c.enabled ? 'active' : 'rejected'}">${c.enabled ? 'مفعل' : 'معطل'}</span>
+                            </div>
+                            <div class="admin-actions">
+                                <button class="admin-btn edit" onclick="openEditCountryModal('${c.code}')">
+                                    <i class="fas fa-edit"></i> تعديل
+                                </button>
+                                <button class="admin-btn ${c.enabled ? 'reject' : 'approve'}" onclick="toggleCountry('${c.code}', ${!c.enabled})">
+                                    <i class="fas fa-${c.enabled ? 'times' : 'check'}"></i> ${c.enabled ? 'تعطيل' : 'تفعيل'}
+                                </button>
+                            </div>
+                        </div>
+                    `).join('') || '<div class="empty"><p>لا توجد دول</p></div>'}
+                </div>
+            `;
+        }
+
+        async function loadAdminSettings(content) {
+            const r = await fetch(`${API}/admin/settings?admin=true`);
+            const d = await r.json();
+            const s = d.settings || {};
+
+            content.innerHTML = `
+                <div class="form-card">
+                    <h3 class="mb-2"><i class="fas fa-cog"></i> إعدادات النظام</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">الحد الأدنى للإيداع ($)</label>
+                        <input type="number" class="form-input" id="setMinDeposit" value="${s.minDeposit || 1.5}" step="0.1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">الحد الأدنى للسحب ($)</label>
+                        <input type="number" class="form-input" id="setMinWithdrawal" value="${s.minWithdrawal || 2}" step="0.1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">مكافأة الإحالة ($)</label>
+                        <input type="number" class="form-input" id="setReferralBonus" value="${s.referralBonus || 0.01}" step="0.01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">عتبة كشف الاحتيال (%)</label>
+                        <input type="number" class="form-input" id="setFraudThreshold" value="${(s.fraudThreshold || 0.65) * 100}" min="0" max="100">
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                        <label class="form-label" style="margin: 0;">وضع الصيانة</label>
+                        <label class="toggle">
+                            <input type="checkbox" id="setMaintenance" ${s.maintenanceMode ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                        <label class="form-label" style="margin: 0;">تفعيل التسجيل</label>
+                        <label class="toggle">
+                            <input type="checkbox" id="setRegistration" ${s.registrationEnabled !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                        <label class="form-label" style="margin: 0;">تفعيل الشراء</label>
+                        <label class="toggle">
+                            <input type="checkbox" id="setBuyEnabled" ${s.buyEnabled !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                        <label class="form-label" style="margin: 0;">تفعيل البيع</label>
+                        <label class="toggle">
+                            <input type="checkbox" id="setSellEnabled" ${s.sellEnabled !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <button class="btn btn-primary mt-2" onclick="saveSettings()">
+                        <i class="fas fa-save"></i> حفظ الإعدادات
+                    </button>
+                </div>
+            `;
+        }
+
+        function loadAdminAddNumber(content) {
+            content.innerHTML = `
+                <div class="form-card">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span>إضافة رقم جديد للبيع مباشرة</span>
+                    </div>
+                    <form id="adminAddForm">
+                        <div class="form-group">
+                            <label class="form-label">رقم الهاتف</label>
+                            <input type="tel" class="form-input" id="adminPhone" placeholder="+1234567890" dir="ltr" required>
+                        </div>
+                        <div class="form-group hidden" id="adminCodeGrp">
+                            <label class="form-label">كود التحقق</label>
+                            <input type="text" class="form-input" id="adminCode" placeholder="12345" dir="ltr" maxlength="6">
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="adminAddBtn">
+                            <i class="fas fa-paper-plane"></i> إرسال الكود
+                        </button>
+                    </form>
+                </div>
+            `;
+
+            document.getElementById('adminAddForm').addEventListener('submit', handleAdminAddNumber);
+        }
+
+        async function handleAdminAddNumber(e) {
+            e.preventDefault();
+
+            const phone = document.getElementById('adminPhone').value.trim();
+            const codeGrp = document.getElementById('adminCodeGrp');
+            const code = document.getElementById('adminCode').value.trim();
+            const btn = document.getElementById('adminAddBtn');
+            const originalText = btn.innerHTML;
+
+            if (codeGrp.classList.contains('hidden')) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+
+                try {
+                    const r = await fetch(`${API}/admin/add-send-code?admin=true`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone })
+                    });
+                    const d = await r.json();
+
+                    if (d.success) {
+                        codeGrp.classList.remove('hidden');
+                        btn.innerHTML = '<i class="fas fa-check"></i> تأكيد وإضافة';
+                        toast('تم إرسال الكود', 'success');
+                    } else {
+                        throw new Error(d.error || d.message);
+                    }
+                } catch (err) {
+                    toast(err.message, 'error');
+                    btn.innerHTML = originalText;
+                }
+
+                btn.disabled = false;
+            } else {
+                if (code.length < 5) {
+                    toast('أدخل الكود', 'error');
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإضافة...';
+
+                try {
+                    const r = await fetch(`${API}/admin/add-verify?admin=true`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone, code })
+                    });
+                    const d = await r.json();
+
+                    if (d.success) {
+                        toast('تمت الإضافة بنجاح!', 'success');
+                        e.target.reset();
+                        codeGrp.classList.add('hidden');
+                        loadCountries();
+                        loadAdminTab('numbers');
+                    } else {
+                        throw new Error(d.error);
+                    }
+                } catch (err) {
+                    toast(err.message, 'error');
+                }
+
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الكود';
+            }
+        }
+
+        // Admin Actions
+        async function adminApproveSell(id) {
+            try {
+                const r = await fetch(`${API}/admin/approve-sell?admin=true`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    toast('تمت الموافقة', 'success');
+                    loadAdminTab('sells');
+                    loadCountries();
+                } else throw new Error(d.error);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function adminRejectSell(id) {
+            const reason = prompt('سبب الرفض (اختياري):');
+            try {
+                const r = await fetch(`${API}/admin/reject-sell?admin=true`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, reason })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    toast('تم الرفض', 'success');
+                    loadAdminTab('sells');
+                } else throw new Error(d.error);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function adminApproveWithdrawal(id) {
+            const txid = prompt('أدخل TXID للمعاملة:');
+            if (!txid) return;
+
+            try {
+                const r = await fetch(`${API}/admin/approve-withdrawal?admin=true`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, txid })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    toast('تمت الموافقة', 'success');
+                    loadAdminTab('withdrawals');
+                } else throw new Error(d.error);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function adminRejectWithdrawal(id) {
+            const reason = prompt('سبب الرفض:');
+            try {
+                const r = await fetch(`${API}/admin/reject-withdrawal?admin=true`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, reason })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    toast('تم الرفض وإرجاع الرصيد', 'success');
+                    loadAdminTab('withdrawals');
+                } else throw new Error(d.error);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function adminDeleteNumber(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا الرقم؟')) return;
+
+            try {
+                const r = await fetch(`${API}/admin/delete-number?admin=true`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    toast('تم الحذف', 'success');
+                    loadAdminTab('numbers');
+                    loadCountries();
+                } else throw new Error(d.error);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function adminBanUser(id) {
+            const reason = prompt('سبب الحظر:');
+            if (!reason) return;
+
+            try {
+                const r = await fetch(`${API}/admin/user/${id}/ban?admin=true`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    toast('تم الحظر', 'success');
+                    loadAdminTab('users');
+                } else throw new Error(d.error);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function adminUnbanUser(id) {
+            try {
+                const r = await fetch(`${API}/admin/user/${id}/unban?admin=true`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const d = await r.json();
+                if (d.success) {
+                    toast('تم رفع الحظر', 'success');
+                    loadAdminTab('users');
+                } else throw new Error(d.error);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function openEditUserModal(id, username, balance, banned) {
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-edit"></i> <span>تعديل المستخدم</span>';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">اسم المستخدم</label>
+                    <input type="text" class="form-input" value="${username}" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الرصيد الحالي ($)</label>
+                    <input type="number" class="form-input" id="editUserBalance" value="${balance}" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">إضافة/خصم رصيد ($)</label>
+                    <input type="number" class="form-input" id="editUserAddBalance" value="0" step="0.01">
+                    <div class="form-hint">أدخل رقم موجب للإضافة أو سالب للخصم</div>
+                </div>
+                <button class="btn btn-primary" onclick="saveUserBalance('${id}')">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            `;
+            openModal();
+        }
+
+        async function saveUserBalance(id) {
+            const balance = parseFloat(document.getElementById('editUserBalance').value);
+            const addAmount = parseFloat(document.getElementById('editUserAddBalance').value) || 0;
+
+            try {
+                if (addAmount !== 0) {
+                    await fetch(`${API}/admin/user/${id}/add-balance?admin=true`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ amount: addAmount, reason: 'تعديل يدوي من الإدارة' })
+                    });
+                } else {
+                    await fetch(`${API}/admin/user/${id}?admin=true`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ balance })
+                    });
+                }
+
+                toast('تم الحفظ', 'success');
+                closeModal();
+                loadAdminTab('users');
+            } catch (e) {
+                toast('حدث خطأ', 'error');
+            }
+        }
+
+        async function toggleCountry(code, enabled) {
+            try {
+                const r = await fetch(`${API}/admin/country/${code}?admin=true`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    toast(enabled ? 'تم التفعيل' : 'تم التعطيل', 'success');
+                    loadAdminTab('countries');
+                    loadCountries();
+                }
+            } catch (e) { toast('حدث خطأ', 'error'); }
+        }
+
+        function openAddCountryModal() {
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> <span>إضافة دولة</span>';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">رمز الدولة (مثل: EG)</label>
+                    <input type="text" class="form-input" id="newCountryCode" placeholder="EG" maxlength="3" style="text-transform: uppercase;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">اسم الدولة</label>
+                    <input type="text" class="form-input" id="newCountryName" placeholder="مصر">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">رمز العلم (مثل: eg)</label>
+                    <input type="text" class="form-input" id="newCountryFlag" placeholder="eg">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">كود الهاتف</label>
+                    <input type="text" class="form-input" id="newCountryPhone" placeholder="+20">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">سعر الشراء ($)</label>
+                        <input type="number" class="form-input" id="newCountryBuy" value="1.00" step="0.05">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">سعر البيع ($)</label>
+                        <input type="number" class="form-input" id="newCountrySell" value="0.80" step="0.05">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveNewCountry()">
+                    <i class="fas fa-save"></i> إضافة
+                </button>
+            `;
+            openModal();
+        }
+
+        async function saveNewCountry() {
+            const data = {
+                code: document.getElementById('newCountryCode').value.toUpperCase(),
+                name: document.getElementById('newCountryName').value,
+                flag: document.getElementById('newCountryFlag').value.toLowerCase(),
+                phoneCode: document.getElementById('newCountryPhone').value,
+                buyPrice: parseFloat(document.getElementById('newCountryBuy').value),
+                sellPrice: parseFloat(document.getElementById('newCountrySell').value)
+            };
+
+            if (!data.code || !data.name || !data.phoneCode) {
+                toast('جميع الحقول مطلوبة', 'error');
+                return;
+            }
+
+            try {
+                const r = await fetch(`${API}/admin/country?admin=true`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const d = await r.json();
+                if (d.success) {
+                    toast('تمت الإضافة', 'success');
+                    closeModal();
+                    loadAdminTab('countries');
+                    loadCountries();
+                } else throw new Error(d.error);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        function openEditCountryModal(code) {
+            const c = countries.find(x => x.code === code);
+            if (!c) return;
+
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> <span>تعديل الدولة</span>';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">اسم الدولة</label>
+                    <input type="text" class="form-input" id="editCountryName" value="${c.name}">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">سعر الشراء ($)</label>
+                        <input type="number" class="form-input" id="editCountryBuy" value="${c.buyPrice}" step="0.05">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">سعر البيع ($)</label>
+                        <input type="number" class="form-input" id="editCountrySell" value="${c.sellPrice}" step="0.05">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveCountryEdit('${code}')">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            `;
+            openModal();
+        }
+
+        async function saveCountryEdit(code) {
+            const data = {
+                name: document.getElementById('editCountryName').value,
+                buyPrice: parseFloat(document.getElementById('editCountryBuy').value),
+                sellPrice: parseFloat(document.getElementById('editCountrySell').value)
+            };
+
+            try {
+                const r = await fetch(`${API}/admin/country/${code}?admin=true`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const d = await r.json();
+                if (d.success) {
+                    toast('تم الحفظ', 'success');
+                    closeModal();
+                    loadAdminTab('countries');
+                    loadCountries();
+                } else throw new Error(d.error);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        async function saveSettings() {
+            const data = {
+                minDeposit: parseFloat(document.getElementById('setMinDeposit').value),
+                minWithdrawal: parseFloat(document.getElementById('setMinWithdrawal').value),
+                referralBonus: parseFloat(document.getElementById('setReferralBonus').value),
+                fraudThreshold: parseFloat(document.getElementById('setFraudThreshold').value) / 100,
+                maintenanceMode: document.getElementById('setMaintenance').checked,
+                registrationEnabled: document.getElementById('setRegistration').checked,
+                buyEnabled: document.getElementById('setBuyEnabled').checked,
+                sellEnabled: document.getElementById('setSellEnabled').checked
+            };
+
+            try {
+                const r = await fetch(`${API}/admin/settings?admin=true`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const d = await r.json();
+                if (d.success) {
+                    toast('تم حفظ الإعدادات', 'success');
+                    loadSettings();
+                } else throw new Error(d.error);
+            } catch (e) { toast(e.message, 'error'); }
+        }
+
+        // ==================== Toast ====================
+        function toast(message, type = 'success') {
+            const container = document.getElementById('toasts');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+            toast.innerHTML = `<i class="fas fa-${icon}"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'fadeIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ==================== Cleanup ====================
         window.addEventListener('beforeunload', () => {
             Object.values(pollers).forEach(p => clearInterval(p));
+        });
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Close modal on backdrop click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
         });
     </script>
 </body>
